@@ -4,6 +4,16 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <title>Meet Planner</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    const EMAILJS_PUBLIC_KEY  = '8CsyyjasZgzzZN43E';
+    const EMAILJS_SERVICE_ID  = 'service_i4lp5gu';
+    const EMAILJS_TEMPLATE_ID = 'template_2vl4ttd';
+    const HOST_NAME = 'Aniket';
+    (function(){emailjs.init({publicKey: EMAILJS_PUBLIC_KEY})})();
+  </script>
+
   <style>
     :root{
       --accent:#ff4f8b;--accent2:#ffd1df;
@@ -15,38 +25,53 @@
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
     html,body{min-height:100%;overflow-x:hidden;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;color:#fff}
     body{min-height:100svh;transition:background .6s ease}
-    body::before{content:'';position:fixed;inset:0;z-index:-3;background-image:var(--bg-img);background-size:cover;background-position:center 40%;background-attachment:fixed;filter:saturate(1.12) contrast(1.08) brightness(0.92);opacity:0.95}
-    body::after{content:'';position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 25% 15%, rgba(255,79,139,0.18), transparent 25%), radial-gradient(circle at 75% 85%, rgba(255,79,139,0.12), transparent 28%), linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.25));pointer-events:none}
-    body.mtf{--bg-img:url('mtf.jpg')}
-    body.friends{--bg-img:url('friends.jpeg');--accent:#38d6ff;--accent2:#ffe66d}
-    body.friends::after{background:radial-gradient(circle at 25% 15%, rgba(56,214,255,0.15), transparent 25%), radial-gradient(circle at 75% 85%, rgba(56,214,255,0.1), transparent 28%), linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.25))}
-    body.parents{--bg-img:url('parents.jpg');--accent:#ffb25f;--accent2:#fff1c2}
-    body.parents::after{background:radial-gradient(circle at 25% 15%, rgba(255,178,95,0.15), transparent 25%), radial-gradient(circle at 75% 85%, rgba(255,178,95,0.1), transparent 28%), linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.25))}
-    body.siblings{--bg-img:url('siblings.jpg');--accent:#9cff8f;--accent2:#93c5fd}
-    body.siblings::after{background:radial-gradient(circle at 25% 15%, rgba(156,255,143,0.15), transparent 25%), radial-gradient(circle at 75% 85%, rgba(156,255,143,0.1), transparent 28%), linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.25))}
 
+    body::before{
+      content:'';position:fixed;inset:0;z-index:-3;
+      background-image:var(--bg-img);background-size:cover;
+      background-position:center 40%;background-attachment:fixed;
+      filter:saturate(1.12) contrast(1.08) brightness(0.92);opacity:0.95;
+    }
+    body::after{
+      content:'';position:fixed;inset:0;z-index:-2;
+      background:
+        radial-gradient(circle at 25% 15%, rgba(255,79,139,0.18), transparent 25%),
+        radial-gradient(circle at 75% 85%, rgba(255,79,139,0.12), transparent 28%),
+        linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.25));
+      pointer-events:none;
+    }
+
+    
+    body.mtf  {--bg-img:url('mtf.jpg');--accent:#ff4f8b;--accent2:#ffd1df}
+    body.friends{--bg-img:url('friends.jpeg');--accent:#38d6ff;--accent2:#ffe66d}
+    body.friends::after{background:radial-gradient(circle at 25% 15%,rgba(56,214,255,.15),transparent 25%),radial-gradient(circle at 75% 85%,rgba(56,214,255,.1),transparent 28%),linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.18) 50%,rgba(0,0,0,.25))}
+    body.parents{--bg-img:url('parents.jpg');--accent:#ffb25f;--accent2:#fff1c2}
+    body.parents::after{background:radial-gradient(circle at 25% 15%,rgba(255,178,95,.15),transparent 25%),radial-gradient(circle at 75% 85%,rgba(255,178,95,.1),transparent 28%),linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.18) 50%,rgba(0,0,0,.25))}
+    body.siblings{--bg-img:url('siblings.jpg');--accent:#9cff8f;--accent2:#93c5fd}
+    body.siblings::after{background:radial-gradient(circle at 25% 15%,rgba(156,255,143,.15),transparent 25%),radial-gradient(circle at 75% 85%,rgba(156,255,143,.1),transparent 28%),linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.18) 50%,rgba(0,0,0,.25))}
+
+    
     .app{width:min(100%,520px);margin:0 auto;min-height:100svh;padding:max(16px,env(safe-area-inset-top)) 16px max(120px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:18px}
 
-    /* TOPBAR */
+    
     .topbar{position:sticky;top:12px;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:20px;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--gb);box-shadow:var(--shadow)}
     .brand{display:flex;align-items:center;gap:9px;font-weight:850;font-size:15px}
     .badge{width:34px;height:34px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));font-size:18px}
     .pill{padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800;background:var(--glass);border:1px solid var(--gb);color:rgba(255,255,255,.82)}
 
-    /* HERO */
+    
     .hero{padding:16px 2px 2px}
     .kicker{font-size:13px;font-weight:850;text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:8px}
     h1{font-size:clamp(36px,11vw,54px);line-height:.9;font-weight:950;text-shadow:0 12px 32px rgba(0,0,0,.4);max-width:12ch}
     .sub{margin-top:12px;color:var(--muted);font-size:13px;line-height:1.45;max-width:32ch}
 
-    /* SCREENS */
+    
     .screen{display:none;flex-direction:column;gap:14px;animation:enter .4s cubic-bezier(.2,.9,.2,1) both}
     .screen.active{display:flex}
     @keyframes enter{from{opacity:0;transform:translateY(16px) scale(.985);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
-
     .sec-title{font-size:17px;font-weight:900;margin-top:4px}
 
-    /* VIBE GRID */
+    
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .card{padding:16px;border-radius:22px;cursor:pointer;overflow:hidden;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--gb);box-shadow:var(--shadow);transition:transform .18s,border-color .18s,box-shadow .18s;position:relative;min-height:120px}
     .card:active{transform:scale(.975)}
@@ -56,26 +81,31 @@
     .card p{font-size:12px;color:rgba(255,255,255,.65);line-height:1.35}
     .shine{position:absolute;right:-30%;bottom:-40%;width:90px;height:90px;border-radius:50%;background:color-mix(in srgb,var(--accent) 32%,transparent);filter:blur(26px);pointer-events:none}
 
-    /* CHIPS */
+    
     .chips{display:flex;flex-wrap:wrap;gap:10px}
     .chip{min-height:46px;display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font:inherit;font-size:14px;font-weight:850;color:#fff;cursor:pointer;border:1px solid var(--gb);background:var(--glass);backdrop-filter:blur(18px);box-shadow:0 12px 30px rgba(0,0,0,.18);transition:transform .18s,border-color .18s}
     .chip.selected{border-color:var(--accent);border-width:2px;outline:2px solid var(--accent);outline-offset:1px;box-shadow:0 12px 30px rgba(0,0,0,.3),0 0 24px color-mix(in srgb,var(--accent) 45%,transparent)}
     .chip:active{transform:scale(.975)}
 
-    /* FOOD CARDS */
+    
     .food{min-height:108px;padding:14px}
     .food .em{font-size:26px}
     .food-name{font-size:16px;font-weight:900;margin:8px 0 3px}
 
-    /* FORM */
+    
     .form{display:grid;gap:12px}
     label{display:grid;gap:7px;font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.75)}
-    input[type=text],input[type=date],input[type=time],input[type=email],select,textarea{width:100%;min-height:54px;padding:0 14px;border-radius:17px;font:inherit;font-size:15px;color:#fff;outline:none;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--gb);box-shadow:0 14px 34px rgba(0,0,0,.18)}
+    input[type=text],input[type=date],input[type=time],input[type=email],select,textarea{
+      width:100%;min-height:54px;padding:0 14px;border-radius:17px;
+      font:inherit;font-size:15px;color:#fff;outline:none;
+      background:var(--glass);backdrop-filter:blur(18px);
+      border:1px solid var(--gb);box-shadow:0 14px 34px rgba(0,0,0,.18);
+    }
     input::placeholder,textarea::placeholder{color:rgba(255,255,255,.42)}
     select option{color:#111}
     textarea{min-height:80px;padding:14px;resize:vertical;line-height:1.45}
 
-    /* RECEIPT (step 5 review) */
+    
     .receipt{padding:18px;border-radius:22px;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--gb);box-shadow:var(--shadow)}
     .receipt-top{text-align:center;padding:14px 4px 18px}
     .celebrate{font-size:52px;margin-bottom:8px;display:block;animation:pop 1.6s ease infinite}
@@ -85,44 +115,40 @@
     .rline{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid rgba(255,255,255,.15);font-size:14px;color:rgba(255,255,255,.75)}
     .rline strong{color:#fff;font-weight:900;text-align:right}
 
-    /* ═══════════════════════════════════════════════
-       CHAT CONFIRMATION SCREEN (screen 6)
-    ════════════════════════════════════════════════ */
-    .chat-wrap{display:flex;flex-direction:column;gap:0}
+    
+    .chat-wrap{display:flex;flex-direction:column}
 
-    /* header card */
     .chat-header{
       text-align:center;padding:28px 18px 22px;
       border-radius:22px 22px 0 0;
       background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#8b00ff));
       position:relative;overflow:hidden;
     }
-    .chat-header::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.06);border-radius:inherit}
+    .chat-header::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.06)}
     .chat-avatar{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 12px;border:2px solid rgba(255,255,255,.35)}
-    .chat-name{font-size:18px;font-weight:950}
+    .chat-hname{font-size:18px;font-weight:950}
     .chat-status{font-size:12px;color:rgba(255,255,255,.75);margin-top:4px;letter-spacing:.04em}
     .online-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-right:5px;vertical-align:middle;box-shadow:0 0 6px #4ade80}
 
-    /* chat body */
     .chat-body{
       background:rgba(0,0,0,.28);backdrop-filter:blur(18px);
       border-left:1px solid var(--gb);border-right:1px solid var(--gb);
       padding:18px 14px;display:flex;flex-direction:column;gap:10px;
+      max-height:62vh;overflow-y:auto;scroll-behavior:smooth;
     }
+    /* custom scrollbar */
+    .chat-body::-webkit-scrollbar{width:4px}
+    .chat-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:4px}
 
-    /* date separator */
     .chat-date{text-align:center;font-size:11px;color:rgba(255,255,255,.45);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:4px 0}
 
-    /* bubbles */
     .bubble-row{display:flex;align-items:flex-end;gap:8px}
     .bubble-row.user{flex-direction:row-reverse}
-    .bubble-row.bot{flex-direction:row}
-
     .bot-icon{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
 
     .bubble{
-      max-width:78%;padding:10px 14px;border-radius:18px;
-      font-size:14px;line-height:1.45;position:relative;
+      max-width:80%;padding:10px 14px;border-radius:18px;
+      font-size:14px;line-height:1.45;
       animation:bubbleIn .35s cubic-bezier(.2,.9,.2,1) both;
     }
     @keyframes bubbleIn{from{opacity:0;transform:translateY(10px) scale(.92)}to{opacity:1;transform:none}}
@@ -136,55 +162,32 @@
       border:1px solid rgba(255,255,255,.18);color:#fff;
       border-bottom-left-radius:4px;
     }
-    .bubble .bq{font-size:11px;color:rgba(255,255,255,.55);margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+    .bubble .bq{font-size:10px;color:rgba(255,255,255,.5);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
     .bubble .bv{font-weight:800;font-size:15px}
-    .bubble-time{font-size:10px;color:rgba(255,255,255,.42);margin-top:5px;text-align:right}
+    .btime{font-size:10px;color:rgba(255,255,255,.38);margin-top:5px;text-align:right}
 
-    /* typing indicator */
     .typing{display:flex;align-items:center;gap:4px;padding:10px 14px;background:rgba(255,255,255,.1);border-radius:18px;border-bottom-left-radius:4px;width:fit-content}
-    .typing span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55);animation:dot 1.2s ease infinite}
+    .typing span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55);animation:tdot 1.2s ease infinite}
     .typing span:nth-child(2){animation-delay:.2s}
     .typing span:nth-child(3){animation-delay:.4s}
-    @keyframes dot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+    @keyframes tdot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
 
-    /* summary card inside chat */
-    .sum-card{
-      background:rgba(255,255,255,.1);backdrop-filter:blur(14px);
-      border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:14px;
-      margin-top:4px;
-    }
+    .sum-card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:12px;margin-top:6px}
     .sum-row{display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:13px}
     .sum-row:last-child{border-bottom:none}
     .sum-icon{font-size:18px;width:26px;text-align:center;flex-shrink:0}
-    .sum-label{color:rgba(255,255,255,.55);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
-    .sum-val{font-weight:800;color:#fff;font-size:14px}
+    .sum-label{color:rgba(255,255,255,.5);font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+    .sum-val{font-weight:800;color:#fff;font-size:13px}
 
-    /* email sent badge */
-    .email-badge{
-      display:flex;align-items:center;gap:10px;
-      padding:12px 14px;border-radius:14px;margin-top:4px;
-      background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);
-    }
-    .email-badge .eicon{font-size:22px}
-    .email-badge p{font-size:13px;line-height:1.4;color:rgba(255,255,255,.85)}
-    .email-badge strong{color:#4ade80;display:block;font-size:12px;margin-top:2px}
+    .email-badge{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:14px;margin-top:6px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3)}
+    .email-badge .eicon{font-size:22px;flex-shrink:0}
+    .email-badge p{font-size:13px;line-height:1.5;color:rgba(255,255,255,.85)}
+    .email-badge strong{color:#4ade80;font-size:12px}
 
-    /* chat footer */
-    .chat-footer{
-      border-radius:0 0 22px 22px;
-      background:rgba(0,0,0,.35);backdrop-filter:blur(18px);
-      border:1px solid var(--gb);border-top:none;
-      padding:14px;display:flex;align-items:center;gap:10px;
-    }
-    .chat-input-fake{
-      flex:1;height:44px;border-radius:999px;
-      background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);
-      display:flex;align-items:center;padding:0 14px;
-      color:rgba(255,255,255,.35);font-size:14px;
-    }
-    .chat-send{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;font-size:18px;cursor:pointer;display:grid;place-items:center;flex-shrink:0;color:#fff}
+    .chat-footer{border-radius:0 0 22px 22px;background:rgba(0,0,0,.35);backdrop-filter:blur(18px);border:1px solid var(--gb);border-top:none;padding:12px 14px;display:flex;align-items:center;gap:10px}
+    .chat-input-fake{flex:1;height:42px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;padding:0 14px;color:rgba(255,255,255,.35);font-size:13px}
+    .chat-send{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;font-size:18px;cursor:pointer;display:grid;place-items:center;flex-shrink:0;color:#fff}
 
-    /* BOTTOM NAV */
     .bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:14px 16px max(14px,env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,rgba(0,0,0,.75) 35%,rgba(0,0,0,.92))}
     .actions{width:min(100%,520px);margin:0 auto;display:flex;gap:10px}
     button{min-height:56px;border:0;border-radius:20px;font:inherit;font-weight:930;cursor:pointer;transition:transform .18s,opacity .18s}
@@ -193,14 +196,14 @@
     .ghost{width:74px;color:#fff;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--gb)}
     button:disabled{opacity:.42;cursor:not-allowed}
 
-    /* PARTICLES */
-    .hearts{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:5}
+    .fx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:5}
     .heart{position:absolute;bottom:-40px;opacity:0;will-change:transform,opacity;animation:floatH linear forwards}
+    .leaf{position:absolute;bottom:-40px;opacity:0;will-change:transform,opacity;animation:floatL linear forwards}
     @keyframes floatH{0%{opacity:0;transform:translate3d(0,0,0) scale(.8)}12%{opacity:.55}100%{opacity:0;transform:translate3d(var(--dx),-112vh,0) scale(1.2) rotate(var(--rot))}}
-    .leaf{position:absolute;bottom:-40px;opacity:0;will-change:transform,opacity;animation:floatL linear forwards;font-size:20px}
     @keyframes floatL{0%{opacity:0;transform:translate3d(0,0,0) scale(.9) rotateZ(0deg)}10%{opacity:.65}100%{opacity:0;transform:translate3d(var(--dx),-110vh,0) scale(1.1) rotateZ(var(--rot))}}
 
-    .nf-hidden{display:none}
+    /* ── NETLIFY HIDDEN FORM ── */
+    .nf-hidden{display:none!important}
 
     @media(max-width:640px){
       .app{padding:max(12px,env(safe-area-inset-top)) 12px max(90px,env(safe-area-inset-bottom))}
@@ -209,15 +212,22 @@
 </head>
 <body class="mtf">
 
-<!-- NETLIFY DETECTION FORM (hidden, required) -->
+ 
 <form name="meet-planner" netlify netlify-honeypot="bot-field" class="nf-hidden">
-  <input name="bot-field"/><input name="name"/><input name="email"/>
-  <input name="vibe"/><input name="drink"/><input name="food"/>
-  <input name="date"/><input name="time"/><input name="slot"/>
-  <input name="location"/><input name="note"/>
+  <input name="bot-field"/>
+  <input name="name"/>
+  <input name="email"/>
+  <input name="vibe"/>
+  <input name="drink"/>
+  <input name="food"/>
+  <input name="date"/>
+  <input name="time"/>
+  <input name="slot"/>
+  <input name="location"/>
+  <input name="note"/>
 </form>
 
-<div class="hearts" id="hearts"></div>
+<div class="fx" id="fx"></div>
 
 <main class="app">
   <header class="topbar">
@@ -234,7 +244,7 @@
     <p class="sub" id="heroSub">Pick the vibe, stack the snacks, lock the time, and make it official.</p>
   </section>
 
-  <!-- S1: VIBE -->
+    
   <section class="screen active" id="s1">
     <div class="grid2">
       <article class="card" data-vibe="mtf" onclick="pickVibe('mtf')">
@@ -252,41 +262,41 @@
     </div>
   </section>
 
-  <!-- S2: DRINKS + FOOD -->
+    
   <section class="screen" id="s2">
     <p class="sec-title">Choose the sip</p>
     <div class="chips">
-      <button class="chip" type="button" data-drink="Iced Coffee" onclick="pickDrink('Iced Coffee')">🧊 Iced Coffee</button>
-      <button class="chip" type="button" data-drink="Bubble Tea" onclick="pickDrink('Bubble Tea')">🧋 Bubble Tea</button>
-      <button class="chip" type="button" data-drink="Mocktail" onclick="pickDrink('Mocktail')">🍹 Mocktail</button>
-      <button class="chip" type="button" data-drink="Hot Chocolate" onclick="pickDrink('Hot Chocolate')">☕ Hot Chocolate</button>
-      <button class="chip" type="button" data-drink="Fresh Juice" onclick="pickDrink('Fresh Juice')">🍊 Fresh Juice</button>
-      <button class="chip" type="button" data-drink="Lassi" onclick="pickDrink('Lassi')">🥛 Lassi</button>
+      <button class="chip" type="button" data-drink="Iced Coffee"    onclick="pickDrink('Iced Coffee')">🧊 Iced Coffee</button>
+      <button class="chip" type="button" data-drink="Bubble Tea"     onclick="pickDrink('Bubble Tea')">🧋 Bubble Tea</button>
+      <button class="chip" type="button" data-drink="Mocktail"       onclick="pickDrink('Mocktail')">🍹 Mocktail</button>
+      <button class="chip" type="button" data-drink="Hot Chocolate"  onclick="pickDrink('Hot Chocolate')">☕ Hot Chocolate</button>
+      <button class="chip" type="button" data-drink="Fresh Juice"    onclick="pickDrink('Fresh Juice')">🍊 Fresh Juice</button>
+      <button class="chip" type="button" data-drink="Lassi"          onclick="pickDrink('Lassi')">🥛 Lassi</button>
     </div>
     <p class="sec-title">Add food</p>
     <div class="grid2">
-      <article class="card food" data-food="Pizza" onclick="toggleFood('Pizza')">
+      <article class="card food" data-food="Pizza"   onclick="toggleFood('Pizza')">
         <div class="em">🍕</div><div class="food-name">Pizza</div><p>Shareable classic</p><div class="shine"></div>
       </article>
-      <article class="card food" data-food="Sushi" onclick="toggleFood('Sushi')">
-        <div class="em">🍣</div><div class="food-name">Sushi</div><p>Clean & premium</p><div class="shine"></div>
+      <article class="card food" data-food="Sushi"   onclick="toggleFood('Sushi')">
+        <div class="em">🍣</div><div class="food-name">Sushi</div><p>Clean &amp; premium</p><div class="shine"></div>
       </article>
-      <article class="card food" data-food="Fries" onclick="toggleFood('Fries')">
-        <div class="em">🍟</div><div class="food-name">Fries</div><p>Crispy side quest</p><div class="shine"></div>
+      <article class="card food" data-food="Chicken Roll" onclick="toggleFood('Chicken Roll')">
+        <div class="em">🌯</div><div class="food-name">Chicken Roll</div><p>Hearty wrap</p><div class="shine"></div>
       </article>
       <article class="card food" data-food="Dessert" onclick="toggleFood('Dessert')">
         <div class="em">🍰</div><div class="food-name">Dessert</div><p>Sweet finale</p><div class="shine"></div>
       </article>
       <article class="card food" data-food="Biryani" onclick="toggleFood('Biryani')">
-        <div class="em">🍛</div><div class="food-name">Biryani</div><p>The real deal</p><div class="shine"></div>
+        <div class="em">🍲</div><div class="food-name">Biryani</div><p>The real deal</p><div class="shine"></div>
       </article>
-      <article class="card food" data-food="Snacks" onclick="toggleFood('Snacks')">
-        <div class="em">🥨</div><div class="food-name">Snacks</div><p>Light bites</p><div class="shine"></div>
+      <article class="card food" data-food="Snacks"  onclick="toggleFood('Snacks')">
+        <div class="em">🥪</div><div class="food-name">Snacks</div><p>Light bites</p><div class="shine"></div>
       </article>
     </div>
   </section>
 
-  <!-- S3: DATE & TIME -->
+    
   <section class="screen" id="s3">
     <p class="sec-title">Lock the moment</p>
     <div class="form">
@@ -306,57 +316,57 @@
     </div>
   </section>
 
-  <!-- S4: USER DETAILS -->
+    
   <section class="screen" id="s4">
     <p class="sec-title">Your details</p>
-    <p style="color:var(--muted);font-size:14px;line-height:1.45">You'll get a beautiful confirmation summary sent straight to your inbox.</p>
+    <p style="color:var(--muted);font-size:14px;line-height:1.5">Fill in your info — you'll get a full confirmation summary straight to your inbox. 📨</p>
     <div class="form">
-      <label>Your name<input id="nameInput" type="text" placeholder="e.g. Aryan" oninput="syncDetails()"/></label>
-      <label>Your email<input id="emailInput" type="email" placeholder="you@example.com" oninput="syncDetails()"/></label>
-      <label>Any note? (optional)<textarea id="noteInput" placeholder="Looking forward to it!"></textarea></label>
+      <label>Your name
+        <input id="nameInput" type="text" placeholder="e.g. Aryan" oninput="syncDetails()"/>
+      </label>
+      <label>Your email
+        <input id="emailInput" type="email" placeholder="you@example.com" oninput="syncDetails()"/>
+      </label>
+      <label>Any special note? (optional)
+        <textarea id="noteInput" placeholder="Looking forward to it!" oninput="syncDetails()"></textarea>
+      </label>
     </div>
   </section>
 
-  <!-- S5: REVIEW -->
+    
   <section class="screen" id="s5">
     <div class="receipt" id="receipt"></div>
-    <!-- Netlify actual submit form -->
-    <form id="nlForm" name="meet-planner" method="POST" data-netlify="true" style="display:none">
-      <input type="hidden" name="form-name" value="meet-planner"/>
-      <input type="hidden" name="bot-field"/>
-      <input type="hidden" id="fn_vibe" name="vibe"/>
-      <input type="hidden" id="fn_drink" name="drink"/>
-      <input type="hidden" id="fn_food" name="food"/>
-      <input type="hidden" id="fn_date" name="date"/>
-      <input type="hidden" id="fn_time" name="time"/>
-      <input type="hidden" id="fn_slot" name="slot"/>
-      <input type="hidden" id="fn_location" name="location"/>
-      <input type="hidden" id="fn_name" name="name"/>
-      <input type="hidden" id="fn_email" name="email"/>
-      <input type="hidden" id="fn_note" name="note"/>
+
+  
+    <form id="nlForm" name="meet-planner" method="POST" netlify style="display:none">
+      <input type="hidden" name="form-name"  value="meet-planner"/>
+      <input type="hidden" name="bot-field"  value=""/>
+      <input type="hidden" id="fn_vibe"      name="vibe"/>
+      <input type="hidden" id="fn_drink"     name="drink"/>
+      <input type="hidden" id="fn_food"      name="food"/>
+      <input type="hidden" id="fn_date"      name="date"/>
+      <input type="hidden" id="fn_time"      name="time"/>
+      <input type="hidden" id="fn_slot"      name="slot"/>
+      <input type="hidden" id="fn_location"  name="location"/>
+      <input type="hidden" id="fn_name"      name="name"/>
+      <input type="hidden" id="fn_email"     name="email"/>
+      <input type="hidden" id="fn_note"      name="note"/>
     </form>
   </section>
 
-  <!-- S6: CHAT CONFIRMATION -->
+    
   <section class="screen" id="s6">
     <div class="chat-wrap">
-
-      <!-- Chat header -->
       <div class="chat-header">
         <div class="chat-avatar" id="chatAvatar">✨</div>
-        <div class="chat-name" id="chatName">Meet Planner</div>
+        <div class="chat-hname" id="chatHName">Meet Planner</div>
         <div class="chat-status"><span class="online-dot"></span>Confirmed just now</div>
       </div>
-
-      <!-- Chat body — filled by JS -->
       <div class="chat-body" id="chatBody"></div>
-
-      <!-- Fake input bar -->
       <div class="chat-footer">
         <div class="chat-input-fake">Your meet is locked in 🎉</div>
-        <button class="chat-send" onclick="resetApp()">↩</button>
+        <button class="chat-send" title="Start over" onclick="resetApp()">↩</button>
       </div>
-
     </div>
   </section>
 
@@ -364,103 +374,127 @@
 
 <nav class="bottom">
   <div class="actions">
-    <button class="ghost" id="backBtn" onclick="go(cur-1)" style="display:none">Back</button>
+    <button class="ghost"   id="backBtn" onclick="go(cur-1)" style="display:none">Back</button>
     <button class="primary" id="nextBtn" onclick="handleNext()" disabled>Choose vibe</button>
   </div>
 </nav>
 
 <script>
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
 const V={vibe:'',drink:'',foods:[],date:'',time:'',slot:'',loc:'',name:'',email:'',note:''};
 let cur=1;
 const TOTAL=5;
 
-const vibes={
-  mtf:{name:'More Than Friends',emoji:'💝',kicker:'Romantic mode',title:'Make it feel like a movie.',sub:'Soft plans, sweet details, and a confirmation that feels like butterflies.',cls:'mtf',color:'#ff4f8b'},
-  friends:{name:'Friends',emoji:'🧑‍🤝‍🧑',kicker:'Friend group mode',title:'Good plans. Loud laughs.',sub:'Build a hangout with color, snacks, and zero overthinking.',cls:'friends',color:'#38d6ff'},
-  parents:{name:'Parents',emoji:'👨‍👩‍👦',kicker:'Family mode',title:'Warmth begins the ultimate comfort zone.',sub:'Choose a comfortable meet that feels thoughtful from the first tap.',cls:'parents',color:'#ffb25f'},
-  siblings:{name:'Siblings',emoji:'🫂',kicker:'Sibling mode',title:'Book the catch-up.',sub:'Nostalgia, comfort food, and the kind of plan that turns into a memory.',cls:'siblings',color:'#9cff8f'}
+const VIBES={
+  mtf:     {name:'More Than Friends', emoji:'💝', kicker:'Romantic mode',      title:'Make it feel like a movie.',          sub:'Soft plans, sweet details, and a confirmation that feels like butterflies.', cls:'mtf'},
+  friends: {name:'Friends',           emoji:'🧑‍🤝‍🧑', kicker:'Friend group mode', title:'Good plans. Loud laughs.',            sub:'Build a hangout with color, snacks, and zero overthinking.',               cls:'friends'},
+  parents: {name:'Parents',           emoji:'👨‍👩‍👦', kicker:'Family mode',        title:'Warmth begins the ultimate comfort zone.',sub:'Choose a comfortable meet that feels thoughtful from the first tap.',    cls:'parents'},
+  siblings:{name:'Siblings',          emoji:'🫂', kicker:'Sibling mode',        title:'Book the catch-up.',                  sub:'Nostalgia, comfort food, and the kind of plan that turns into a memory.',  cls:'siblings'}
 };
 
-const labels={1:'Choose vibe',2:'Continue',3:'Set details',4:'Your info',5:'Confirm & send'};
+const LABELS={1:'Choose vibe',2:'Continue',3:'Set details',4:'Your info',5:'Confirm & send'};
 
+/* ═══════════════════════════════════════════════
+   STEP 1 — VIBE
+═══════════════════════════════════════════════ */
 function pickVibe(v){
-  V.vibe=v;document.body.className=vibes[v].cls;
+  V.vibe=v;
+  document.body.className=VIBES[v].cls;
   document.querySelectorAll('[data-vibe]').forEach(c=>c.classList.toggle('selected',c.dataset.vibe===v));
-  const cp=vibes[v];
+  const cp=VIBES[v];
   document.getElementById('kicker').textContent=cp.kicker;
   document.getElementById('heroTitle').textContent=cp.title;
   document.getElementById('heroSub').textContent=cp.sub;
-  burst();validate();
+  burst(); validate();
 }
 
+/* ═══════════════════════════════════════════════
+   STEP 2 — DRINKS & FOOD
+═══════════════════════════════════════════════ */
 function pickDrink(d){
   V.drink=d;
   document.querySelectorAll('[data-drink]').forEach(c=>c.classList.toggle('selected',c.dataset.drink===d));
-  burst();validate();
+  burst(); validate();
 }
-
 function toggleFood(f){
   V.foods=V.foods.includes(f)?V.foods.filter(x=>x!==f):[...V.foods,f];
   document.querySelectorAll('[data-food]').forEach(c=>c.classList.toggle('selected',V.foods.includes(c.dataset.food)));
-  burst();validate();
+  burst(); validate();
 }
 
+/* ═══════════════════════════════════════════════
+   STEP 3 — DATE & TIME
+═══════════════════════════════════════════════ */
 function syncForm(){
   V.date=document.getElementById('dateInput').value;
   V.time=document.getElementById('timeInput').value;
   V.slot=document.getElementById('slotInput').value;
-  V.loc=document.getElementById('locInput').value.trim();
+  V.loc =document.getElementById('locInput').value.trim();
   validate();
 }
 
+/* ═══════════════════════════════════════════════
+   STEP 4 — USER DETAILS
+═══════════════════════════════════════════════ */
 function syncDetails(){
-  V.name=document.getElementById('nameInput').value.trim();
+  V.name =document.getElementById('nameInput').value.trim();
   V.email=document.getElementById('emailInput').value.trim();
-  V.note=document.getElementById('noteInput').value.trim();
+  V.note =document.getElementById('noteInput').value.trim();
   validate();
 }
 
+/* ═══════════════════════════════════════════════
+   VALIDATION
+═══════════════════════════════════════════════ */
 function isValid(s){
-  if(s===1)return!!V.vibe;
-  if(s===2)return!!(V.drink&&V.foods.length);
-  if(s===3)return!!(V.date&&V.time&&V.slot);
-  if(s===4)return!!(V.name&&V.email&&/\S+@\S+\.\S+/.test(V.email));
+  if(s===1) return !!V.vibe;
+  if(s===2) return !!(V.drink && V.foods.length);
+  if(s===3) return !!(V.date && V.time && V.slot);
+  if(s===4) return !!(V.name && V.email && /\S+@\S+\.\S+/.test(V.email));
   return true;
 }
+function validate(){ document.getElementById('nextBtn').disabled=!isValid(cur) }
 
-function validate(){document.getElementById('nextBtn').disabled=!isValid(cur)}
-
+/* ═══════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════ */
 function go(n){
   cur=Math.max(1,Math.min(6,n));
   document.querySelectorAll('.screen').forEach((el,i)=>el.classList.toggle('active',i+1===cur));
-  document.getElementById('stepPill').textContent=cur<=TOTAL?`Step ${cur} of ${TOTAL}`:'Done! ✓';
-  document.getElementById('backBtn').style.display=cur<=1||cur===6?'none':'block';
-  document.getElementById('nextBtn').style.display=cur===6?'none':'block';
-  if(cur<6)document.getElementById('nextBtn').textContent=labels[cur]||'Next';
-  if(cur===5)buildReceipt();
-  if(cur===6){
-    buildChat();
-    document.getElementById('kicker').textContent='Sent with love';
-    document.getElementById('heroTitle').textContent="It's official.";
-    document.getElementById('heroSub').textContent='Your meet plan is confirmed and on its way.';
-  } else if(V.vibe){
-    const cp=vibes[V.vibe];
-    document.getElementById('kicker').textContent=cp.kicker;
-    document.getElementById('heroTitle').textContent=cp.title;
-    document.getElementById('heroSub').textContent=cp.sub;
-  }
+  document.getElementById('stepPill').textContent = cur<=TOTAL ? `Step ${cur} of ${TOTAL}` : 'Done! ✓';
+  document.getElementById('backBtn').style.display = (cur<=1||cur===6) ? 'none' : 'block';
+  const nextBtn=document.getElementById('nextBtn');
+  nextBtn.style.display = cur===6 ? 'none' : 'block';
+  if(cur<6) nextBtn.textContent = LABELS[cur]||'Next';
+
+  if(cur===5) buildReceipt();
+  if(cur===6){ buildChat(); setHeroDone(); }
+  else if(V.vibe){ const cp=VIBES[V.vibe]; setHero(cp.kicker,cp.title,cp.sub); }
   validate();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function handleNext(){
-  if(cur===5){submitToNetlify();return;}
+  if(cur===5){ submitForm(); return; }
   go(cur+1);
 }
 
-/* ─── BUILD REVIEW RECEIPT ─── */
+function setHero(k,t,s){
+  document.getElementById('kicker').textContent=k;
+  document.getElementById('heroTitle').textContent=t;
+  document.getElementById('heroSub').textContent=s;
+}
+function setHeroDone(){
+  setHero('Sent with love',"It's official.",'Your meet plan is confirmed and on its way.');
+}
+
+/* ═══════════════════════════════════════════════
+   STEP 5 — REVIEW RECEIPT
+═══════════════════════════════════════════════ */
 function buildReceipt(){
-  const v=vibes[V.vibe]||{};
+  const v=VIBES[V.vibe]||{};
   const foods=V.foods.length?V.foods.join(', '):'None selected';
   document.getElementById('receipt').innerHTML=`
     <div class="receipt-top">
@@ -468,79 +502,125 @@ function buildReceipt(){
       <h2>Review your meet</h2>
       <p class="sub">Everything look good? Hit confirm to send.</p>
     </div>
-    <div class="rline"><span>Vibe</span><strong>${v.emoji} ${v.name}</strong></div>
-    <div class="rline"><span>Drink</span><strong>${V.drink}</strong></div>
-    <div class="rline"><span>Food</span><strong>${foods}</strong></div>
-    <div class="rline"><span>Date</span><strong>${fmtDate(V.date)}</strong></div>
-    <div class="rline"><span>Time</span><strong>${fmtTime(V.time)}</strong></div>
-    <div class="rline"><span>Slot</span><strong>${V.slot}</strong></div>
+    <div class="rline"><span>Vibe</span>    <strong>${v.emoji} ${v.name}</strong></div>
+    <div class="rline"><span>Drink</span>   <strong>${V.drink}</strong></div>
+    <div class="rline"><span>Food</span>    <strong>${foods}</strong></div>
+    <div class="rline"><span>Date</span>    <strong>${fmtDate(V.date)}</strong></div>
+    <div class="rline"><span>Time</span>    <strong>${fmtTime(V.time)}</strong></div>
+    <div class="rline"><span>Slot</span>    <strong>${V.slot}</strong></div>
     <div class="rline"><span>Location</span><strong>${esc(V.loc||'TBD')}</strong></div>
-    <div class="rline"><span>Name</span><strong>${esc(V.name)}</strong></div>
-    <div class="rline"><span>Email</span><strong>${esc(V.email)}</strong></div>
+    <div class="rline"><span>Name</span>    <strong>${esc(V.name)}</strong></div>
+    <div class="rline"><span>Email</span>   <strong>${esc(V.email)}</strong></div>
     ${V.note?`<div class="rline"><span>Note</span><strong>${esc(V.note)}</strong></div>`:''}
   `;
 }
 
-/* ─── BUILD BEAUTIFUL CHAT SCREEN ─── */
+/* ═══════════════════════════════════════════════
+   SUBMIT — Netlify (host) + EmailJS (user)
+═══════════════════════════════════════════════ */
+function submitForm(){
+  const btn=document.getElementById('nextBtn');
+  btn.disabled=true; btn.textContent='Sending... ✈️';
+
+  /* ── Fill Netlify hidden form ── */
+  const v=VIBES[V.vibe]||{};
+  document.getElementById('fn_vibe').value     = v.name||V.vibe;
+  document.getElementById('fn_drink').value    = V.drink;
+  document.getElementById('fn_food').value     = V.foods.join(', ')||'None';
+  document.getElementById('fn_date').value     = fmtDate(V.date);
+  document.getElementById('fn_time').value     = fmtTime(V.time);
+  document.getElementById('fn_slot').value     = V.slot;
+  document.getElementById('fn_location').value = V.loc||'TBD';
+  document.getElementById('fn_name').value     = V.name;
+  document.getElementById('fn_email').value    = V.email;
+  document.getElementById('fn_note').value     = V.note;
+
+  /* ── 1. POST to Netlify (notifies host) ── */
+  const netlifyPromise = fetch('/',{
+    method:'POST',
+    body: new FormData(document.getElementById('nlForm'))
+  }).catch(()=>{});
+
+  /* ── 2. Send confirmation email to user via EmailJS ── */
+  const emailPromise = (EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY')
+    ? emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_name:     V.name,
+        to_email:    V.email,
+        host_name:   HOST_NAME,
+        vibe:        v.name||V.vibe,
+        drink:       V.drink,
+        food:        V.foods.join(', ')||'None',
+        date:        fmtDate(V.date),
+        time:        fmtTime(V.time),
+        slot:        V.slot,
+        location:    V.loc||'TBD',
+        note:        V.note||'—',
+      })
+    : Promise.resolve();
+
+  Promise.allSettled([netlifyPromise, emailPromise]).then(()=>{ go(6); });
+}
+
+/* ═══════════════════════════════════════════════
+   STEP 6 — CHAT CONFIRMATION SCREEN
+═══════════════════════════════════════════════ */
 function buildChat(){
-  const v=vibes[V.vibe]||{name:'Your Meet',emoji:'✨'};
-  const foods=V.foods.length?V.foods.join(' · '):'None';
-  const now=new Date();
-  const timeStr=now.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
-  const dateStr=now.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  const v    = VIBES[V.vibe]||{name:'Your Meet',emoji:'✨'};
+  const foods= V.foods.length ? V.foods.join(' · ') : 'None';
+  const now  = new Date();
+  const tStr = now.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+  const dStr = now.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
 
-  // Update chat header
-  document.getElementById('chatAvatar').textContent=v.emoji;
-  document.getElementById('chatName').textContent=`${v.name} Meet`;
+  document.getElementById('chatAvatar').textContent = v.emoji;
+  document.getElementById('chatHName').textContent  = `${v.name} Meet`;
 
-  // Conversation messages with delays for staggered animation
+  const noteDelay = V.note ? 1250 : 0;
+
   const msgs=[
-    {type:'bot', text:`Hey ${esc(V.name)}! 👋 I've got your full meet plan ready. Here's everything you chose:`, delay:0},
-    {type:'user', label:'Vibe chosen', val:`${v.emoji} ${v.name}`, delay:200},
-    {type:'user', label:'Sip of choice', val:`🥤 ${V.drink}`, delay:350},
-    {type:'user', label:'Food picks', val:`🍽️ ${foods}`, delay:500},
-    {type:'user', label:'Date & time', val:`📅 ${fmtDate(V.date)} at ${fmtTime(V.time)}`, delay:650},
-    {type:'user', label:'Slot vibe', val:`🌅 ${V.slot}`, delay:800},
-    {type:'user', label:'Location', val:`📍 ${esc(V.loc||'TBD')}`, delay:950},
-    {type:'user', label:'Your email', val:`📧 ${esc(V.email)}`, delay:1100},
-    ...(V.note?[{type:'user',label:'Your note',val:`💬 ${esc(V.note)}`,delay:1250}]:[]),
-    {type:'bot', isSummary:true, delay: V.note?1450:1300},
-    {type:'bot', isEmailBadge:true, delay: V.note?1700:1550},
+    {type:'bot',  text:`Hey ${esc(V.name)}! 👋 I've got your full meet plan right here. Let's recap everything you chose:`, delay:0},
+    {type:'user', label:'Vibe chosen',    val:`${v.emoji} ${v.name}`,                          delay:200},
+    {type:'user', label:'Sip of choice',  val:`🥤 ${V.drink}`,                                 delay:360},
+    {type:'user', label:'Food picks',     val:`🍽️ ${foods}`,                                   delay:520},
+    {type:'user', label:'Date & time',    val:`📅 ${fmtDate(V.date)} at ${fmtTime(V.time)}`,   delay:680},
+    {type:'user', label:'Slot vibe',      val:`🌅 ${V.slot}`,                                  delay:840},
+    {type:'user', label:'Location',       val:`📍 ${esc(V.loc||'TBD')}`,                       delay:1000},
+    {type:'user', label:'Your email',     val:`📧 ${esc(V.email)}`,                            delay:1100},
+    ...(V.note ? [{type:'user', label:'Your note', val:`💬 ${esc(V.note)}`, delay:1250}] : []),
+    {type:'bot',  isSummary:true,     delay: 1300 + noteDelay},
+    {type:'bot',  isEmailBadge:true,  delay: 1600 + noteDelay},
   ];
 
   const body=document.getElementById('chatBody');
   body.innerHTML='';
 
-  // Date separator
+  /* date separator */
   const sep=document.createElement('div');
-  sep.className='chat-date';sep.textContent=dateStr;
+  sep.className='chat-date'; sep.textContent=dStr;
   body.appendChild(sep);
 
-  // Typing indicator shown first
-  const typingRow=document.createElement('div');
-  typingRow.className='bubble-row bot';
-  typingRow.innerHTML=`<div class="bot-icon">${v.emoji}</div><div class="typing"><span></span><span></span><span></span></div>`;
-  body.appendChild(typingRow);
+  /* typing indicator */
+  const tyRow=document.createElement('div');
+  tyRow.className='bubble-row bot';
+  tyRow.innerHTML=`<div class="bot-icon">${v.emoji}</div><div class="typing"><span></span><span></span><span></span></div>`;
+  body.appendChild(tyRow);
 
   msgs.forEach((m,i)=>{
     setTimeout(()=>{
-      // Remove typing on first bot message
-      if(m.type==='bot'&&i===0)typingRow.remove();
+      if(m.type==='bot' && i===0) tyRow.remove();
 
       const row=document.createElement('div');
       row.className=`bubble-row ${m.type}`;
 
       if(m.type==='bot'){
         const icon=document.createElement('div');
-        icon.className='bot-icon';icon.textContent=v.emoji;
+        icon.className='bot-icon'; icon.textContent=v.emoji;
 
         const bub=document.createElement('div');
         bub.className='bubble bot';
-        bub.style.animationDelay=`${m.delay}ms`;
 
         if(m.isSummary){
           bub.innerHTML=`
-            <div class="bq">Your full plan</div>
+            <div class="bq">📋 Your full plan</div>
             <div class="sum-card">
               <div class="sum-row"><span class="sum-icon">${v.emoji}</span><div><div class="sum-label">Vibe</div><div class="sum-val">${v.name}</div></div></div>
               <div class="sum-row"><span class="sum-icon">🥤</span><div><div class="sum-label">Drink</div><div class="sum-val">${V.drink}</div></div></div>
@@ -549,20 +629,21 @@ function buildChat(){
               <div class="sum-row"><span class="sum-icon">🌅</span><div><div class="sum-label">Slot</div><div class="sum-val">${V.slot}</div></div></div>
               <div class="sum-row"><span class="sum-icon">📍</span><div><div class="sum-label">Location</div><div class="sum-val">${esc(V.loc||'TBD')}</div></div></div>
             </div>
-            <div class="bubble-time">${timeStr}</div>
-          `;
+            <div class="btime">${tStr}</div>`;
         } else if(m.isEmailBadge){
+          /* FIX: correctly shows user email + host name from constant */
           bub.innerHTML=`
-            <div class="bq">Notification sent</div>
+            <div class="bq">✅ Notifications sent</div>
             <div class="email-badge">
               <div class="eicon">📨</div>
-              <p>A confirmation email has been sent to you<strong></strong></p>
+              <p>A confirmation has been sent to<br><strong>${esc(V.email)}</strong></p>
             </div>
-            <p style="font-size:13px;color:rgba(255,255,255,.65);margin-top:10px;line-height:1.4">"Aniket has also been notified. See you at the meet!".</p>
-            <div class="bubble-time">${timeStr}</div>
-          `;
+            <p style="font-size:13px;color:rgba(255,255,255,.65);margin-top:10px;line-height:1.5">
+              <strong style="color:#fff">${esc(HOST_NAME)}</strong> has also been notified and will reach out soon. See you at the meet! 🎉
+            </p>
+            <div class="btime">${tStr}</div>`;
         } else {
-          bub.innerHTML=`${m.text}<div class="bubble-time">${timeStr}</div>`;
+          bub.innerHTML=`${m.text}<div class="btime">${tStr}</div>`;
         }
 
         row.appendChild(icon);
@@ -571,39 +652,19 @@ function buildChat(){
       } else {
         const bub=document.createElement('div');
         bub.className='bubble user';
-        bub.style.animationDelay=`${m.delay}ms`;
-        bub.innerHTML=`<div class="bq">${m.label}</div><div class="bv">${m.val}</div><div class="bubble-time">${timeStr} ✓✓</div>`;
+        bub.innerHTML=`<div class="bq">${m.label}</div><div class="bv">${m.val}</div><div class="btime">${tStr} ✓✓</div>`;
         row.appendChild(bub);
       }
 
       body.appendChild(row);
       body.scrollTop=body.scrollHeight;
-
-    },m.delay+200);
+    }, m.delay + 200);
   });
 }
 
-/* ─── NETLIFY SUBMIT ─── */
-function submitToNetlify(){
-  const btn=document.getElementById('nextBtn');
-  btn.disabled=true;btn.textContent='Sending...';
-
-  document.getElementById('fn_vibe').value=vibes[V.vibe]?.name||V.vibe;
-  document.getElementById('fn_drink').value=V.drink;
-  document.getElementById('fn_food').value=V.foods.join(', ')||'None';
-  document.getElementById('fn_date').value=fmtDate(V.date);
-  document.getElementById('fn_time').value=fmtTime(V.time);
-  document.getElementById('fn_slot').value=V.slot;
-  document.getElementById('fn_location').value=V.loc||'TBD';
-  document.getElementById('fn_name').value=V.name;
-  document.getElementById('fn_email').value=V.email;
-  document.getElementById('fn_note').value=V.note;
-
-  fetch('/',{method:'POST',body:new FormData(document.getElementById('nlForm'))})
-    .then(r=>{go(6)})
-    .catch(()=>{go(6)}); // show success on localhost too
-}
-
+/* ═══════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════ */
 function resetApp(){
   Object.assign(V,{vibe:'',drink:'',foods:[],date:'',time:'',slot:'',loc:'',name:'',email:'',note:''});
   document.body.className='mtf';
@@ -611,45 +672,63 @@ function resetApp(){
   document.querySelectorAll('input:not([type=hidden])').forEach(i=>i.value='');
   document.getElementById('slotInput').value='';
   document.getElementById('noteInput').value='';
-  document.getElementById('kicker').textContent='Premium booking energy';
-  document.getElementById('heroTitle').textContent='Plan the perfect meet.';
-  document.getElementById('heroSub').textContent='Pick the vibe, stack the snacks, lock the time, and make it official.';
+  setHero('Premium booking energy','Plan the perfect meet.','Pick the vibe, stack the snacks, lock the time, and make it official.');
+  /* FIX: ensure next button is visible and reset after screen 6 */
+  const nb=document.getElementById('nextBtn');
+  nb.style.display='block';
+  nb.disabled=true;
   go(1);
 }
 
-/* ─── HELPERS ─── */
-function fmtDate(v){if(!v)return'-';return new Date(v+'T00:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'})}
-function fmtTime(v){if(!v)return'-';const[h,m]=v.split(':');const d=new Date();d.setHours(+h,+m);return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c])}
+/* ═══════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════ */
+function fmtDate(v){
+  if(!v)return'-';
+  return new Date(v+'T00:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+}
+function fmtTime(v){
+  if(!v)return'-';
+  const[h,m]=v.split(':');const d=new Date();d.setHours(+h,+m);
+  return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
 
-/* ─── PARTICLES ─── */
-function heart(){
-  if(V.vibe!=='mtf')return;
+/* ═══════════════════════════════════════════════
+   PARTICLES (FIX: use #fx container, not #hearts)
+═══════════════════════════════════════════════ */
+function spawnHeart(){
+  if(V.vibe!=='mtf') return;
   const el=document.createElement('span');
-  el.className='heart';el.textContent=Math.random()>.5?'♡':'♥';
-  el.style.cssText=`left:${Math.random()*100}vw;font-size:${28+Math.random()*36}px;animation-duration:${6000+Math.random()*5000}ms`;
+  el.className='heart';
+  el.textContent=Math.random()>.5?'♡':'♥';
+  el.style.cssText=`left:${Math.random()*100}vw;font-size:${22+Math.random()*30}px;animation-duration:${6000+Math.random()*5000}ms`;
   el.style.setProperty('--dx',(Math.random()*90-45)+'px');
   el.style.setProperty('--rot',(Math.random()*90-45)+'deg');
-  document.getElementById('hearts').appendChild(el);
+  document.getElementById('fx').appendChild(el);
   setTimeout(()=>el.remove(),12000);
 }
-function leaf(){
-  if(V.vibe==='mtf')return;
-  const leafEmojis=['🍃','🍂','🍁'];
+function spawnLeaf(){
+  if(V.vibe==='mtf'||!V.vibe) return;
+  const leafs=['🍃','🍂','🍁'];
   const el=document.createElement('span');
-  el.className='leaf';el.textContent=leafEmojis[Math.floor(Math.random()*leafEmojis.length)];
-  el.style.cssText=`left:${Math.random()*100}vw;font-size:${16+Math.random()*24}px;animation-duration:${7000+Math.random()*4000}ms`;
+  el.className='leaf';
+  el.textContent=leafs[Math.floor(Math.random()*leafs.length)];
+  el.style.cssText=`left:${Math.random()*100}vw;font-size:${16+Math.random()*22}px;animation-duration:${7000+Math.random()*4000}ms`;
   el.style.setProperty('--dx',(Math.random()*100-50)+'px');
   el.style.setProperty('--rot',(Math.random()*720-360)+'deg');
-  document.getElementById('hearts').appendChild(el);
+  document.getElementById('fx').appendChild(el);
   setTimeout(()=>el.remove(),12000);
 }
 function burst(){
-  if(V.vibe==='mtf'){for(let i=0;i<3;i++)setTimeout(heart,i*70)}
-  else{for(let i=0;i<2;i++)setTimeout(leaf,i*100)}
+  if(V.vibe==='mtf'){ for(let i=0;i<3;i++) setTimeout(spawnHeart,i*70); }
+  else               { for(let i=0;i<2;i++) setTimeout(spawnLeaf,i*100); }
 }
-setInterval(()=>{if(V.vibe==='mtf')heart();else leaf()},700);
+setInterval(()=>{ if(V.vibe==='mtf') spawnHeart(); else spawnLeaf(); },700);
 
+/* ── INIT ── */
 document.getElementById('backBtn').style.display='none';
 validate();
 </script>
