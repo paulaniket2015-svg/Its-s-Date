@@ -10,13 +10,20 @@
       --glass:rgba(255,255,255,0.13);--gb:rgba(255,255,255,0.21);
       --shadow:0 20px 60px rgba(0,0,0,0.32);
       --muted:rgba(255,255,255,0.7);
+      --bg-img:url('mtf.jpg');
     }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
     html,body{min-height:100%;overflow-x:hidden;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;color:#fff}
-    body{min-height:100svh;background:linear-gradient(135deg,#1a0a1e 0%,#2d1040 40%,#1a1040 100%);transition:background .6s ease}
-    body.friends{background:linear-gradient(135deg,#061a2e 0%,#0a2d40 40%,#0a1a40 100%)}
-    body.parents{background:linear-gradient(135deg,#1e0e00 0%,#3d2010 40%,#2d1800 100%)}
-    body.siblings{background:linear-gradient(135deg,#001e0a 0%,#0a3020 40%,#001a20 100%)}
+    body{min-height:100svh;transition:background .6s ease}
+    body::before{content:'';position:fixed;inset:0;z-index:-3;background-image:var(--bg-img);background-size:cover;background-position:center 40%;background-attachment:fixed;filter:saturate(1.12) contrast(1.08) brightness(0.92);opacity:0.95}
+    body::after{content:'';position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 25% 15%, rgba(255,79,139,0.18), transparent 25%), radial-gradient(circle at 75% 85%, rgba(255,79,139,0.12), transparent 28%), linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.25));pointer-events:none}
+    body.mtf{--bg-img:url('mtf.jpg')}
+    body.friends{--bg-img:url('friends.jpeg');--accent:#38d6ff;--accent2:#ffe66d}
+    body.friends::after{background:radial-gradient(circle at 25% 15%, rgba(56,214,255,0.15), transparent 25%), radial-gradient(circle at 75% 85%, rgba(56,214,255,0.1), transparent 28%), linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.25))}
+    body.parents{--bg-img:url('parents.jpg');--accent:#ffb25f;--accent2:#fff1c2}
+    body.parents::after{background:radial-gradient(circle at 25% 15%, rgba(255,178,95,0.15), transparent 25%), radial-gradient(circle at 75% 85%, rgba(255,178,95,0.1), transparent 28%), linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.25))}
+    body.siblings{--bg-img:url('siblings.jpg');--accent:#9cff8f;--accent2:#93c5fd}
+    body.siblings::after{background:radial-gradient(circle at 25% 15%, rgba(156,255,143,0.15), transparent 25%), radial-gradient(circle at 75% 85%, rgba(156,255,143,0.1), transparent 28%), linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.25))}
 
     .app{width:min(100%,520px);margin:0 auto;min-height:100svh;padding:max(16px,env(safe-area-inset-top)) 16px max(120px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:18px}
 
@@ -30,7 +37,7 @@
     .hero{padding:16px 2px 2px}
     .kicker{font-size:13px;font-weight:850;text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:8px}
     h1{font-size:clamp(36px,11vw,54px);line-height:.9;font-weight:950;text-shadow:0 12px 32px rgba(0,0,0,.4);max-width:12ch}
-    .sub{margin-top:12px;color:var(--muted);font-size:15px;line-height:1.45;max-width:32ch}
+    .sub{margin-top:12px;color:var(--muted);font-size:13px;line-height:1.45;max-width:32ch}
 
     /* SCREENS */
     .screen{display:none;flex-direction:column;gap:14px;animation:enter .4s cubic-bezier(.2,.9,.2,1) both}
@@ -43,7 +50,7 @@
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .card{padding:16px;border-radius:22px;cursor:pointer;overflow:hidden;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--gb);box-shadow:var(--shadow);transition:transform .18s,border-color .18s,box-shadow .18s;position:relative;min-height:120px}
     .card:active{transform:scale(.975)}
-    .card.selected{border-color:rgba(255,255,255,.55);box-shadow:var(--shadow),0 0 32px color-mix(in srgb,var(--accent) 38%,transparent)}
+    .card.selected{border-color:var(--accent);border-width:2px;box-shadow:var(--shadow),0 0 48px color-mix(in srgb,var(--accent) 52%,transparent);outline:2px solid var(--accent);outline-offset:2px}
     .em{font-size:32px;line-height:1}
     .card h2{font-size:16px;font-weight:930;margin:10px 0 4px}
     .card p{font-size:12px;color:rgba(255,255,255,.65);line-height:1.35}
@@ -52,7 +59,7 @@
     /* CHIPS */
     .chips{display:flex;flex-wrap:wrap;gap:10px}
     .chip{min-height:46px;display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font:inherit;font-size:14px;font-weight:850;color:#fff;cursor:pointer;border:1px solid var(--gb);background:var(--glass);backdrop-filter:blur(18px);box-shadow:0 12px 30px rgba(0,0,0,.18);transition:transform .18s,border-color .18s}
-    .chip.selected{border-color:rgba(255,255,255,.55)}
+    .chip.selected{border-color:var(--accent);border-width:2px;outline:2px solid var(--accent);outline-offset:1px;box-shadow:0 12px 30px rgba(0,0,0,.3),0 0 24px color-mix(in srgb,var(--accent) 45%,transparent)}
     .chip:active{transform:scale(.975)}
 
     /* FOOD CARDS */
@@ -190,6 +197,8 @@
     .hearts{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:5}
     .heart{position:absolute;bottom:-40px;opacity:0;will-change:transform,opacity;animation:floatH linear forwards}
     @keyframes floatH{0%{opacity:0;transform:translate3d(0,0,0) scale(.8)}12%{opacity:.55}100%{opacity:0;transform:translate3d(var(--dx),-112vh,0) scale(1.2) rotate(var(--rot))}}
+    .leaf{position:absolute;bottom:-40px;opacity:0;will-change:transform,opacity;animation:floatL linear forwards;font-size:20px}
+    @keyframes floatL{0%{opacity:0;transform:translate3d(0,0,0) scale(.9) rotateZ(0deg)}10%{opacity:.65}100%{opacity:0;transform:translate3d(var(--dx),-110vh,0) scale(1.1) rotateZ(var(--rot))}}
 
     .nf-hidden{display:none}
 
@@ -368,7 +377,7 @@ const TOTAL=5;
 const vibes={
   mtf:{name:'More Than Friends',emoji:'💝',kicker:'Romantic mode',title:'Make it feel like a movie.',sub:'Soft plans, sweet details, and a confirmation that feels like butterflies.',cls:'mtf',color:'#ff4f8b'},
   friends:{name:'Friends',emoji:'🧑‍🤝‍🧑',kicker:'Friend group mode',title:'Good plans. Loud laughs.',sub:'Build a hangout with color, snacks, and zero overthinking.',cls:'friends',color:'#38d6ff'},
-  parents:{name:'Parents',emoji:'👨‍👩‍👦',kicker:'Family mode',title:'Plan something warm.',sub:'Choose a comfortable meet that feels thoughtful from the first tap.',cls:'parents',color:'#ffb25f'},
+  parents:{name:'Parents',emoji:'👨‍👩‍👦',kicker:'Family mode',title:'Warmth begins the ultimate comfort zone.',sub:'Choose a comfortable meet that feels thoughtful from the first tap.',cls:'parents',color:'#ffb25f'},
   siblings:{name:'Siblings',emoji:'🫂',kicker:'Sibling mode',title:'Book the catch-up.',sub:'Nostalgia, comfort food, and the kind of plan that turns into a memory.',cls:'siblings',color:'#9cff8f'}
 };
 
@@ -547,9 +556,9 @@ function buildChat(){
             <div class="bq">Notification sent</div>
             <div class="email-badge">
               <div class="eicon">📨</div>
-              <p>A confirmation email has been sent to <strong>${esc(V.email)}</strong></p>
+              <p>A confirmation email has been sent to you<strong></strong></p>
             </div>
-            <p style="font-size:13px;color:rgba(255,255,255,.65);margin-top:10px;line-height:1.4">The host has also been notified. See you at the meet! 🎉</p>
+            <p style="font-size:13px;color:rgba(255,255,255,.65);margin-top:10px;line-height:1.4">"Aniket has also been notified. See you at the meet!".</p>
             <div class="bubble-time">${timeStr}</div>
           `;
         } else {
@@ -618,14 +627,28 @@ function heart(){
   if(V.vibe!=='mtf')return;
   const el=document.createElement('span');
   el.className='heart';el.textContent=Math.random()>.5?'♡':'♥';
-  el.style.cssText=`left:${Math.random()*100}vw;font-size:${12+Math.random()*20}px;animation-duration:${6000+Math.random()*5000}ms`;
+  el.style.cssText=`left:${Math.random()*100}vw;font-size:${28+Math.random()*36}px;animation-duration:${6000+Math.random()*5000}ms`;
   el.style.setProperty('--dx',(Math.random()*90-45)+'px');
   el.style.setProperty('--rot',(Math.random()*90-45)+'deg');
   document.getElementById('hearts').appendChild(el);
   setTimeout(()=>el.remove(),12000);
 }
-function burst(){for(let i=0;i<3;i++)setTimeout(heart,i*70)}
-setInterval(heart,700);
+function leaf(){
+  if(V.vibe==='mtf')return;
+  const leafEmojis=['🍃','🍂','🍁'];
+  const el=document.createElement('span');
+  el.className='leaf';el.textContent=leafEmojis[Math.floor(Math.random()*leafEmojis.length)];
+  el.style.cssText=`left:${Math.random()*100}vw;font-size:${16+Math.random()*24}px;animation-duration:${7000+Math.random()*4000}ms`;
+  el.style.setProperty('--dx',(Math.random()*100-50)+'px');
+  el.style.setProperty('--rot',(Math.random()*720-360)+'deg');
+  document.getElementById('hearts').appendChild(el);
+  setTimeout(()=>el.remove(),12000);
+}
+function burst(){
+  if(V.vibe==='mtf'){for(let i=0;i<3;i++)setTimeout(heart,i*70)}
+  else{for(let i=0;i<2;i++)setTimeout(leaf,i*100)}
+}
+setInterval(()=>{if(V.vibe==='mtf')heart();else leaf()},700);
 
 document.getElementById('backBtn').style.display='none';
 validate();
