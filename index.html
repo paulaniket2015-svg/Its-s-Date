@@ -386,6 +386,7 @@
 const V={vibe:'',drink:'',foods:[],date:'',time:'',slot:'',loc:'',name:'',email:'',note:''};
 let cur=1;
 const TOTAL=5;
+let LAST_EMAIL_STATUS = null;
 
 const VIBES={
   mtf:     {name:'More Than Friends', emoji:'💝', kicker:'Romantic mode',      title:'Make it feel like a movie.',          sub:'Soft plans, sweet details, and a confirmation that feels like butterflies.', cls:'mtf'},
@@ -542,23 +543,32 @@ function submitForm(){
   }).catch(()=>{});
 
   /* ── 2. Send confirmation email to user via EmailJS ── */
-  const emailPromise = (EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY')
-    ? emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        to_name:     V.name,
-        to_email:    V.email,
-        host_name:   HOST_NAME,
-        vibe:        v.name||V.vibe,
-        drink:       V.drink,
-        food:        V.foods.join(', ')||'None',
-        date:        fmtDate(V.date),
-        time:        fmtTime(V.time),
-        slot:        V.slot,
-        location:    V.loc||'TBD',
-        note:        V.note||'—',
-      })
-    : Promise.resolve();
+  let emailPromise;
+  if (EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
+    emailPromise = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_name:     V.name,
+      to_email:    V.email,
+      host_name:   HOST_NAME,
+      vibe:        v.name||V.vibe,
+      drink:       V.drink,
+      food:        V.foods.join(', ')||'None',
+      date:        fmtDate(V.date),
+      time:        fmtTime(V.time),
+      slot:        V.slot,
+      location:    V.loc||'TBD',
+      note:        V.note||'—',
+    })
+    .then(res=>{ console.log('EmailJS send success', res); return res; })
+    .catch(err=>{ console.error('EmailJS send error', err); throw err; });
+  } else {
+    emailPromise = Promise.resolve();
+  }
 
-  Promise.allSettled([netlifyPromise, emailPromise]).then(()=>{ go(6); });
+  Promise.allSettled([netlifyPromise, emailPromise]).then((results)=>{
+    const emailResult = results[1];
+    LAST_EMAIL_STATUS = (emailResult && emailResult.status==='fulfilled') ? 'success' : 'failed';
+    go(6);
+  });
 }
 
 /* ═══════════════════════════════════════════════
@@ -631,15 +641,15 @@ function buildChat(){
             </div>
             <div class="btime">${tStr}</div>`;
         } else if(m.isEmailBadge){
-          /* FIX: correctly shows user email + host name from constant */
+          const emailOk = (LAST_EMAIL_STATUS === 'success');
           bub.innerHTML=`
-            <div class="bq">✅ Notifications sent</div>
+            <div class="bq">${emailOk? '✅ Notifications sent' : '⚠️ Notification issue'}</div>
             <div class="email-badge">
               <div class="eicon">📨</div>
-              <p>A confirmation has been sent to<br><strong>${esc(V.email)}</strong></p>
+              <p>${emailOk ? `A confirmation has been sent to<br><strong>${esc(V.email)}</strong>` : `We couldn't send the confirmation email to<br><strong>${esc(V.email)}</strong>`}</p>
             </div>
             <p style="font-size:13px;color:rgba(255,255,255,.65);margin-top:10px;line-height:1.5">
-              <strong style="color:#fff">${esc(HOST_NAME)}</strong> has also been notified and will reach out soon. See you at the meet! 🎉
+              <strong style="color:#fff">${esc(HOST_NAME)}</strong> has also been notified.${emailOk? ' They will reach out soon. See you at the meet! 🎉' : ' We logged the error — check the browser console and network tab.'}
             </p>
             <div class="btime">${tStr}</div>`;
         } else {
