@@ -956,7 +956,7 @@ function spawnRoseBlast(cx,cy){
     const el=document.createElement('div');el.className='petal';
     if(i%5===0){el.textContent=EMOJIS[Math.floor(Math.random()*EMOJIS.length)];el.style.fontSize=(10+Math.random()*18)+'px';}
     else{const s=8+Math.random()*14;el.style.cssText+=`width:${s}px;height:${s*1.6}px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:hsl(${330+Math.random()*40}deg,90%,${55+Math.random()*20}%);box-shadow:0 0 6px rgba(255,79,139,.5);`;}
-    const angle=Math.random()*Math.PI*2,speed=3+Math.random()*9;
+    const angle=Math.random()*Math.PI*2,speed=5+Math.random()*12;
     const vx=Math.cos(angle)*speed,vy=Math.sin(angle)*speed-(2+Math.random()*5);
     const rot=Math.random()*720-360,scale0=0.6+Math.random()*0.8,life=2200+Math.random()*2600;
     el.style.position='fixed';el.style.left=cx+'px';el.style.top=cy+'px';el.style.zIndex='201';el.style.pointerEvents='none';el.style.willChange='transform,opacity';el.style.opacity='0';
