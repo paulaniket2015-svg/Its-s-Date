@@ -245,13 +245,301 @@
     input[type=text]:focus,input[type=date]:focus,input[type=time]:focus,input[type=email]:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent),0 14px 34px rgba(0,0,0,.18);transition:border-color .2s,box-shadow .2s}
 
     /* ═══════════════════════════════════════════════
-       ✨ ROSE STAGE (MTF)
+       ✨ MTF — PREMIUM CINEMATIC ROSE STAGE
     ═══════════════════════════════════════════════ */
-    #rose-stage{position:fixed;inset:0;z-index:200;pointer-events:none;display:none;align-items:flex-end;justify-content:center;overflow:hidden}
-    #rose-stage.active{display:flex}
-    .rose-svg-wrap{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);width:160px;transform-origin:bottom center;opacity:0}
+
+    /* Full-screen cinematic overlay */
+    #mtf-stage{
+      position:fixed;inset:0;z-index:9000;
+      pointer-events:none;
+      display:none;overflow:hidden;
+      /* Ensure no inherited borders or outlines bleed through */
+      border:none;outline:none;
+    }
+    #mtf-stage.active{ display:block; }
+
+    /* Hard black seal — sits behind the dim backdrop but above all page content */
+    #mtf-stage::before{
+      content:'';
+      position:absolute;inset:0;
+      background:rgba(0,0,0,0);
+      z-index:0;
+      pointer-events:none;
+    }
+
+    /* Cinematic dim backdrop — animated vignette */
+    #mtf-backdrop{
+      position:absolute;inset:0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 50%, transparent 30%, rgba(0,0,0,.88) 100%),
+        rgba(4,0,10,0);
+      opacity:0;
+      transition:opacity 1.2s cubic-bezier(.4,0,.2,1);
+      will-change:opacity;
+    }
+    #mtf-backdrop.dimmed{ opacity:1; }
+
+    /* Spotlight — warm golden shaft behind rose */
+    #mtf-spotlight{
+      position:absolute;
+      left:50%;bottom:-10%;
+      transform:translateX(-50%);
+      width:min(480px,90vw);
+      height:130%;
+      background:conic-gradient(
+        from 270deg at 50% 110%,
+        transparent 34deg,
+        rgba(255,210,120,.07) 50deg,
+        rgba(255,180,80,.13) 60deg,
+        rgba(255,210,120,.07) 70deg,
+        transparent 86deg
+      );
+      filter:blur(18px);
+      opacity:0;
+      transform-origin:bottom center;
+      transition:opacity 1.8s ease;
+    }
+    #mtf-spotlight.on{ opacity:1; }
+
+    /* Canvas layer — rose drawing + particles */
+    #mtf-canvas{
+      position:absolute;inset:0;
+      width:100%;height:100%;
+    }
+
+    /* ── DOM message overlay ── */
+    #mtf-message{
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      pointer-events:none;
+      padding:0 16px;
+    }
+
+    /* Glass love-letter card */
+    .mtf-msg-card{
+      position:relative;
+      background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,79,139,.06));
+      backdrop-filter:blur(22px) saturate(1.4);
+      -webkit-backdrop-filter:blur(22px) saturate(1.4);
+      border:1px solid rgba(255,150,180,.32);
+      border-radius:28px;
+      padding:clamp(22px,5vw,38px) clamp(24px,6vw,52px);
+      text-align:center;
+      max-width:min(400px,90vw);
+      width:100%;
+      opacity:0;
+      transform:translateY(40px) scale(.9);
+      transition:opacity .8s cubic-bezier(.2,.9,.2,1),
+                  transform .8s cubic-bezier(.2,.9,.2,1);
+      box-shadow:
+        0 0 0 1px rgba(255,100,160,.12),
+        0 0 80px rgba(255,79,139,.28),
+        0 32px 64px rgba(0,0,0,.55),
+        inset 0 1px 0 rgba(255,255,255,.14);
+    }
+    .mtf-msg-card.show{
+      opacity:1;
+      transform:none;
+    }
+
+    /* Animated card border glow */
+    .mtf-msg-card::before{
+      content:'';
+      position:absolute;inset:-1px;
+      border-radius:inherit;
+      background:linear-gradient(135deg,
+        rgba(255,79,139,.5) 0%,
+        rgba(255,180,200,.2) 35%,
+        rgba(255,215,0,.3) 65%,
+        rgba(255,79,139,.5) 100%);
+      background-size:300% 300%;
+      animation:cardBorderGlow 3s linear infinite;
+      z-index:-1;
+      opacity:0;
+      transition:opacity .6s ease;
+    }
+    .mtf-msg-card.show::before{ opacity:1; }
+    @keyframes cardBorderGlow{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
+
+    /* Animated glowing heart emoji */
+    .mtf-msg-heart{
+      font-size:clamp(38px,9vw,52px);
+      display:block;
+      margin-bottom:14px;
+      filter:drop-shadow(0 0 18px rgba(255,79,139,.9))
+             drop-shadow(0 0 36px rgba(255,79,139,.5));
+      animation:mtfHeartBeat 1.4s cubic-bezier(.28,.84,.42,1) infinite;
+    }
+    @keyframes mtfHeartBeat{
+      0%,100%{ transform:scale(1)   rotate(0deg); }
+      10%    { transform:scale(1.22) rotate(-3deg); filter:drop-shadow(0 0 28px rgba(255,79,139,1)) drop-shadow(0 0 56px rgba(255,79,139,.7)); }
+      20%    { transform:scale(1)   rotate(3deg); }
+      30%    { transform:scale(1.14) rotate(-2deg); }
+      50%    { transform:scale(1)   rotate(0deg); }
+    }
+
+    /* Typewriter-style reveal lines */
+    .mtf-msg-line{
+      font-size:clamp(14px,4vw,18px);
+      font-weight:700;
+      color:rgba(255,255,255,.93);
+      line-height:1.7;
+      letter-spacing:.025em;
+      overflow:hidden;
+      white-space:nowrap;
+      max-width:0;
+      transition:max-width 1.1s cubic-bezier(.4,0,.2,1);
+    }
+    .mtf-msg-line.typed{ max-width:500px; }
+
+    /* Main message — larger, glowing */
+    .mtf-msg-main{
+      margin-top:10px;
+      font-size:clamp(16px,4.5vw,22px);
+      font-weight:900;
+      background:linear-gradient(90deg,#ffd1df,#ff4f8b,#ffd700,#ff4f8b,#ffd1df);
+      background-size:300% auto;
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+      animation:msgTextShimmer 3s linear infinite;
+      filter:drop-shadow(0 0 12px rgba(255,79,139,.6));
+    }
+    @keyframes msgTextShimmer{
+      to{ background-position:300% center; }
+    }
+
+    /* Signature line */
+    .mtf-msg-sign{
+      margin-top:18px;
+      font-size:clamp(10px,2.8vw,13px);
+      font-weight:800;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(255,150,180,.75);
+      opacity:0;
+      transition:opacity .8s ease;
+    }
+    .mtf-msg-sign.show{ opacity:1; }
+
+    /* Floating animation on the whole card */
+    .mtf-msg-card.show{
+      animation:mtfCardFloat 4s ease-in-out infinite 1s;
+      opacity:1 !important;
+      transform:none !important;
+    }
+    @keyframes mtfCardFloat{
+      0%,100%{ transform:translateY(0) scale(1); }
+      50%     { transform:translateY(-8px) scale(1.008); }
+    }
+
+    /* DOM petal layer */
+    .mtf-dom-petal{
+      position:fixed;pointer-events:none;
+      will-change:transform,opacity;
+      border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+    }
+
+    /* Floating petals (DOM layer for extra depth) */
     .petal{position:fixed;pointer-events:none;font-size:14px;opacity:0;will-change:transform,opacity;filter:drop-shadow(0 0 4px rgba(255,79,139,.6))}
-    .rose-halo{position:absolute;bottom:60px;left:50%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,215,0,.35) 0%,transparent 70%);transform:translateX(-50%) scale(0);filter:blur(18px);opacity:0}
+
+    /* ═══════════════════════════════════════════════
+       ✨ GENERIC VIBE NOTE CARD
+       Reused by Parents (#house-message) and
+       Friends (#friends-message). Colour is driven by
+       --vc / --vc2 set inline per card.
+    ═══════════════════════════════════════════════ */
+    #house-message, #friends-message{
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      pointer-events:none;
+      padding:0 16px;
+      z-index:5;
+    }
+    .vibe-msg-card{
+      --vc:#ffb25f; --vc2:#ffd700;
+      position:relative;
+      background:linear-gradient(135deg,rgba(255,255,255,.08),color-mix(in srgb,var(--vc) 14%,transparent));
+      backdrop-filter:blur(22px) saturate(1.4);
+      -webkit-backdrop-filter:blur(22px) saturate(1.4);
+      border:1px solid color-mix(in srgb,var(--vc) 45%,transparent);
+      border-radius:28px;
+      padding:clamp(22px,5vw,38px) clamp(24px,6vw,52px);
+      text-align:center;
+      max-width:min(400px,90vw);
+      width:100%;
+      opacity:0;
+      transform:translateY(40px) scale(.9);
+      transition:opacity .8s cubic-bezier(.2,.9,.2,1),
+                  transform .8s cubic-bezier(.2,.9,.2,1);
+      box-shadow:
+        0 0 0 1px color-mix(in srgb,var(--vc) 18%,transparent),
+        0 0 80px color-mix(in srgb,var(--vc) 30%,transparent),
+        0 32px 64px rgba(0,0,0,.55),
+        inset 0 1px 0 rgba(255,255,255,.14);
+    }
+    .vibe-msg-card.show{
+      opacity:1; transform:none;
+      animation:vibeCardFloat 4s ease-in-out infinite 1s;
+    }
+    .vibe-msg-card::before{
+      content:'';
+      position:absolute;inset:-1px;
+      border-radius:inherit;
+      background:linear-gradient(135deg,
+        color-mix(in srgb,var(--vc) 55%,transparent) 0%,
+        color-mix(in srgb,var(--vc2) 22%,transparent) 35%,
+        color-mix(in srgb,var(--vc) 28%,transparent) 65%,
+        color-mix(in srgb,var(--vc2) 55%,transparent) 100%);
+      background-size:300% 300%;
+      animation:cardBorderGlow 3s linear infinite;
+      z-index:-1; opacity:0;
+      transition:opacity .6s ease;
+    }
+    .vibe-msg-card.show::before{ opacity:1; }
+
+    .vibe-msg-icon{
+      font-size:clamp(38px,9vw,52px);
+      display:block; margin-bottom:14px;
+      filter:drop-shadow(0 0 18px color-mix(in srgb,var(--vc) 70%,transparent))
+             drop-shadow(0 0 36px color-mix(in srgb,var(--vc) 40%,transparent));
+      animation:mtfHeartBeat 1.6s cubic-bezier(.28,.84,.42,1) infinite;
+    }
+    .vibe-msg-line{
+      font-size:clamp(14px,4vw,18px);
+      font-weight:700; color:rgba(255,255,255,.93);
+      line-height:1.7; letter-spacing:.025em;
+      overflow:hidden; white-space:nowrap; max-width:0;
+      transition:max-width 1.1s cubic-bezier(.4,0,.2,1);
+    }
+    .vibe-msg-line.typed{ max-width:520px; }
+    .vibe-msg-main{
+      margin-top:10px;
+      font-size:clamp(16px,4.5vw,22px);
+      font-weight:900;
+      background:linear-gradient(90deg,#fff,var(--vc),var(--vc2),var(--vc),#fff);
+      background-size:300% auto;
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      animation:msgTextShimmer 3s linear infinite;
+      filter:drop-shadow(0 0 12px color-mix(in srgb,var(--vc) 55%,transparent));
+    }
+    .vibe-msg-sign{
+      margin-top:18px;
+      font-size:clamp(10px,2.8vw,13px);
+      font-weight:800; letter-spacing:.18em; text-transform:uppercase;
+      color:color-mix(in srgb,var(--vc) 75%,white);
+      opacity:0;
+      transition:opacity .8s ease;
+    }
+    .vibe-msg-sign.show{ opacity:1; }
+    @keyframes vibeCardFloat{
+      0%,100%{ transform:translateY(0) scale(1); }
+      50%    { transform:translateY(-8px) scale(1.008); }
+    }
 
     /* ═══════════════════════════════════════════════
        ✨ PARENTS — HOUSE STAGE
@@ -288,20 +576,196 @@
     #constellation-canvas{position:absolute;inset:0;width:100%;height:100%}
 
     /* ═══════════════════════════════════════════════
-       ✨ SIBLINGS — PUZZLE STAGE
+       ✨ SIBLINGS — FILMY CINEMATIC STAGE
     ═══════════════════════════════════════════════ */
     #puzzle-stage{
-      position:fixed;inset:0;z-index:200;
-      pointer-events:none;display:none;
-      align-items:center;justify-content:center;overflow:hidden;
+      position:fixed;inset:0;z-index:9100;
+      pointer-events:none;display:none;overflow:hidden;
     }
-    #puzzle-stage.active{display:flex}
-    #puzzle-canvas{position:absolute;inset:0;width:100%;height:100%}
+    #puzzle-stage.active{ display:block; }
+    #puzzle-canvas{ position:absolute;inset:0;width:100%;height:100%; }
+
+    /* Cinematic letterbox bars */
+    #sib-letterbox-top,#sib-letterbox-bot{
+      position:absolute;left:0;right:0;height:0;
+      background:#000;z-index:2;
+      transition:height .7s cubic-bezier(.4,0,.2,1);
+      pointer-events:none;
+    }
+    #sib-letterbox-top{ top:0; }
+    #sib-letterbox-bot{ bottom:0; }
+    #puzzle-stage.active #sib-letterbox-top,
+    #puzzle-stage.active #sib-letterbox-bot{ height:clamp(30px,6vh,58px); }
+
+    /* Film grain overlay */
+    #sib-grain{
+      position:absolute;inset:0;z-index:3;pointer-events:none;
+      opacity:0;transition:opacity .5s ease;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+      animation:grainShift 0.12s steps(1) infinite;
+      mix-blend-mode:overlay;
+    }
+    #puzzle-stage.active #sib-grain{ opacity:1; }
+    @keyframes grainShift{
+      0%  { background-position:0 0; }
+      25% { background-position:-30px 15px; }
+      50% { background-position:15px -10px; }
+      75% { background-position:-10px 25px; }
+      100%{ background-position:20px -20px; }
+    }
+
+    /* DOM caption / message layer */
+    #sib-caption{
+      position:absolute;inset:0;z-index:4;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      pointer-events:none;padding:0 20px;
+    }
+    .sib-title-card{
+      text-align:center;
+      opacity:0;transform:scale(.85) translateY(20px);
+      transition:opacity .7s cubic-bezier(.2,.9,.2,1), transform .7s cubic-bezier(.2,.9,.2,1);
+    }
+    .sib-title-card.show{ opacity:1; transform:none; }
+
+    /* Bollywood-style title */
+    .sib-main-title{
+      font-size:clamp(28px,8vw,54px);
+      font-weight:950;
+      letter-spacing:.06em;
+      line-height:1;
+      background:linear-gradient(135deg,#ffd700 0%,#fff 35%,#9cff8f 55%,#fff 75%,#93c5fd 100%);
+      background-size:300% auto;
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      animation:sibTitleShimmer 2.5s linear infinite;
+      text-shadow:none;
+      filter:drop-shadow(0 0 22px rgba(156,255,143,.7)) drop-shadow(0 0 44px rgba(147,197,253,.5));
+    }
+    @keyframes sibTitleShimmer{ to{ background-position:300% center; } }
+
+    .sib-sub-title{
+      font-size:clamp(12px,3vw,16px);
+      font-weight:700;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.72);
+      margin-top:10px;
+      opacity:0;
+      transition:opacity .8s ease .3s;
+    }
+    .sib-title-card.show .sib-sub-title{ opacity:1; }
+
+    /* Typewriter quote */
+    .sib-quote{
+      margin-top:18px;
+      font-size:clamp(13px,3.6vw,17px);
+      font-weight:700;
+      color:rgba(255,255,255,.9);
+      font-style:italic;
+      letter-spacing:.03em;
+      text-align:center;
+      overflow:hidden;white-space:nowrap;max-width:0;
+      transition:max-width 1.4s cubic-bezier(.4,0,.2,1);
+      border-right:2px solid rgba(156,255,143,.8);
+      animation:sibCursor .7s step-end infinite;
+    }
+    .sib-quote.typed{ max-width:500px; }
+    .sib-quote.done{ border-right:none; animation:none; }
+    @keyframes sibCursor{ 0%,100%{border-color:rgba(156,255,143,.8)} 50%{border-color:transparent} }
+
+    /* Signature */
+    .sib-sign{
+      margin-top:14px;
+      font-size:clamp(10px,2.5vw,13px);
+      font-weight:800;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(156,255,143,.65);
+      opacity:0;
+      transition:opacity .6s ease;
+    }
+    .sib-sign.show{ opacity:1; }
+
+    /* Glow CSS layer */
     #puzzle-glow{
       position:absolute;
-      width:300px;height:300px;border-radius:50%;
-      background:radial-gradient(circle,rgba(156,255,143,.25) 0%,transparent 70%);
-      filter:blur(40px);opacity:0;pointer-events:none;
+      width:min(400px,80vw);height:min(400px,80vw);border-radius:50%;
+      background:radial-gradient(circle,rgba(156,255,143,.3) 0%,rgba(147,197,253,.2) 40%,transparent 70%);
+      filter:blur(50px);opacity:0;pointer-events:none;
+      left:50%;top:50%;transform:translate(-50%,-50%);
+      transition:opacity .4s ease;
+    }
+
+    /* Director clapperboard flash */
+    #sib-clapper{
+      position:absolute;top:50%;left:50%;
+      transform:translate(-50%,-50%) scaleY(0) rotate(-8deg);
+      transform-origin:top center;
+      opacity:0;z-index:5;pointer-events:none;
+      transition:transform .3s cubic-bezier(.2,.9,.2,1), opacity .2s ease;
+      font-size:clamp(60px,16vw,100px);
+      line-height:1;
+      filter:drop-shadow(0 0 30px rgba(255,255,255,.6));
+    }
+    #sib-clapper.snap{
+      transform:translate(-50%,-50%) scaleY(1) rotate(-8deg);
+      opacity:1;
+    }
+    #sib-clapper.hide{ opacity:0; }
+
+    /* ── Siblings emoji float animation (DOM layer) ── */
+    @keyframes sibEmojiFly{
+      0%  { opacity:1; transform:translate(0,0) scale(0.5) rotate(0deg); }
+      60% { opacity:1; transform:translate(calc(var(--ex)*0.6),calc(var(--ey)*0.7)) scale(1.2) rotate(calc(var(--rot)*0.6)); }
+      100%{ opacity:0; transform:translate(var(--ex),var(--ey)) scale(0.6) rotate(var(--rot)); }
+    }
+
+    /* ═══════════════════════════════════════════════
+       ✨ PREMIUM PAGE TRANSITION OVERLAY
+    ═══════════════════════════════════════════════ */
+    #page-transition{
+      position:fixed;inset:0;z-index:8999;
+      pointer-events:none;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+    /* Ripple wipe element */
+    #pt-ripple{
+      position:absolute;
+      width:10px;height:10px;border-radius:50%;
+      background:var(--accent);
+      transform:scale(0);
+      opacity:0;
+      transition:none;
+    }
+    /* Particles emitted during transition */
+    .pt-spark{
+      position:fixed;pointer-events:none;border-radius:50%;
+      will-change:transform,opacity;
+    }
+    /* Vibe-specific transition emoji */
+    #pt-emoji{
+      position:absolute;
+      font-size:clamp(48px,12vw,80px);
+      opacity:0;
+      transform:scale(0) rotate(-15deg);
+      transition:opacity .35s ease,transform .45s cubic-bezier(.2,.9,.2,1);
+      filter:drop-shadow(0 0 30px currentColor);
+      z-index:2;
+    }
+    #pt-emoji.show{
+      opacity:1;
+      transform:scale(1) rotate(0deg);
+    }
+    #pt-emoji.hide{
+      opacity:0;
+      transform:scale(2.5) rotate(15deg);
+    }
+
+    /* ═══════════════════════════════════════════════
+       ✨ SIBLINGS BROTHERS SCENE CANVAS
+    ═══════════════════════════════════════════════ */
+    #sib-brothers-canvas{
+      position:absolute;inset:0;width:100%;height:100%;z-index:1;
     }
 
     /* ═══════════════════════════════════════════════
@@ -348,36 +812,17 @@
 <div id="cursor-glow" aria-hidden="true"></div>
 
 <!-- ═══════════════════════════════════════════════
-     ✨ MTF — ROSE BLOOM STAGE
+     ✨ MTF — PREMIUM CINEMATIC ROSE STAGE
 ═══════════════════════════════════════════════ -->
-<div id="rose-stage" aria-hidden="true">
-  <div class="rose-halo"    id="roseHalo"></div>
-  <div class="rose-svg-wrap" id="roseSvgWrap">
-    <svg viewBox="0 0 160 260" xmlns="http://www.w3.org/2000/svg" id="roseSvg">
-      <path id="roseStem" d="M80 260 Q78 220 80 180 Q82 140 80 100"
-            fill="none" stroke="#2d6a2d" stroke-width="5" stroke-linecap="round"
-            stroke-dasharray="180" stroke-dashoffset="180"/>
-      <path id="roseLeafL" d="M80 185 Q50 165 38 145 Q60 148 80 185" fill="#3a8a3a" opacity="0"/>
-      <path id="roseLeafR" d="M80 165 Q112 145 124 125 Q102 130 80 165" fill="#3a8a3a" opacity="0"/>
-      <g id="roseBloom" transform="translate(80,100)" opacity="0">
-        <ellipse cx="0" cy="-28" rx="18" ry="32" fill="#c8003a" transform="rotate(0)"   opacity=".9"/>
-        <ellipse cx="0" cy="-28" rx="18" ry="32" fill="#d4004a" transform="rotate(60)"  opacity=".9"/>
-        <ellipse cx="0" cy="-28" rx="18" ry="32" fill="#bf0035" transform="rotate(120)" opacity=".9"/>
-        <ellipse cx="0" cy="-28" rx="18" ry="32" fill="#cc003f" transform="rotate(180)" opacity=".9"/>
-        <ellipse cx="0" cy="-28" rx="18" ry="32" fill="#d4004a" transform="rotate(240)" opacity=".9"/>
-        <ellipse cx="0" cy="-28" rx="18" ry="32" fill="#c0003b" transform="rotate(300)" opacity=".9"/>
-        <ellipse cx="0" cy="-18" rx="13" ry="22" fill="#e8005a" transform="rotate(30)"  opacity=".95"/>
-        <ellipse cx="0" cy="-18" rx="13" ry="22" fill="#f00060" transform="rotate(90)"  opacity=".95"/>
-        <ellipse cx="0" cy="-18" rx="13" ry="22" fill="#e5005a" transform="rotate(150)" opacity=".95"/>
-        <ellipse cx="0" cy="-18" rx="13" ry="22" fill="#f00060" transform="rotate(210)" opacity=".95"/>
-        <ellipse cx="0" cy="-18" rx="13" ry="22" fill="#e8005a" transform="rotate(270)" opacity=".95"/>
-        <ellipse cx="0" cy="-18" rx="13" ry="22" fill="#f00060" transform="rotate(330)" opacity=".95"/>
-        <circle cx="0" cy="0" r="12" fill="#ff4f8b"/>
-        <circle cx="0" cy="0" r="7"  fill="#ff8ab5"/>
-        <circle cx="-3" cy="-3" r="3" fill="rgba(255,255,255,.35)"/>
-      </g>
-    </svg>
-  </div>
+<div id="mtf-stage" aria-hidden="true">
+  <!-- Scene 1: cinematic backdrop dim -->
+  <div id="mtf-backdrop"></div>
+  <!-- Warm spotlight shaft -->
+  <div id="mtf-spotlight"></div>
+  <!-- Canvas: rose draw, bloom, particles, petals, fireflies -->
+  <canvas id="mtf-canvas"></canvas>
+  <!-- DOM: romantic message card -->
+  <div id="mtf-message" aria-hidden="true"></div>
 </div>
 
 <!-- ═══════════════════════════════════════════════
@@ -386,6 +831,8 @@
 <div id="house-stage" aria-hidden="true">
   <canvas id="house-canvas"></canvas>
   <div id="house-glow"></div>
+  <!-- DOM: warm note card -->
+  <div id="house-message" aria-hidden="true"></div>
 </div>
 
 <!-- ═══════════════════════════════════════════════
@@ -393,14 +840,44 @@
 ═══════════════════════════════════════════════ -->
 <div id="constellation-stage" aria-hidden="true">
   <canvas id="constellation-canvas"></canvas>
+  <!-- DOM: friendship note card -->
+  <div id="friends-message" aria-hidden="true"></div>
 </div>
 
 <!-- ═══════════════════════════════════════════════
-     ✨ SIBLINGS — PUZZLE STAGE (Canvas)
+     ✨ PREMIUM PAGE TRANSITION OVERLAY
+═══════════════════════════════════════════════ -->
+<div id="page-transition" aria-hidden="true">
+  <div id="pt-ripple"></div>
+  <div id="pt-emoji" aria-hidden="true"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     ✨ SIBLINGS — FILMY CINEMATIC STAGE
 ═══════════════════════════════════════════════ -->
 <div id="puzzle-stage" aria-hidden="true">
+  <!-- Letterbox cinematic bars -->
+  <div id="sib-letterbox-top"></div>
+  <div id="sib-letterbox-bot"></div>
+  <!-- Film grain texture -->
+  <div id="sib-grain"></div>
+  <!-- Brothers animated scene (drawn first, behind puzzle) -->
+  <canvas id="sib-brothers-canvas"></canvas>
+  <!-- Canvas: puzzle pieces + particles + effects -->
   <canvas id="puzzle-canvas"></canvas>
+  <!-- CSS glow layer -->
   <div id="puzzle-glow"></div>
+  <!-- Director's clapperboard emoji intro -->
+  <div id="sib-clapper" aria-hidden="true">🎬</div>
+  <!-- DOM caption / title card / quote -->
+  <div id="sib-caption">
+    <div class="sib-title-card" id="sibTitleCard">
+      <div class="sib-main-title" id="sibMainTitle">SIBLINGS</div>
+      <div class="sib-sub-title">Because family is forever</div>
+      <div class="sib-quote" id="sibQuote"></div>
+      <div class="sib-sign" id="sibSign">❤️ — Always your sibling</div>
+    </div>
+  </div>
 </div>
 
 <!-- ORIGINAL FX LAYER -->
@@ -457,7 +934,7 @@
       <button class="chip" type="button" data-drink="Bubble Tea"    onclick="pickDrink('Bubble Tea')">🧋 Bubble Tea</button>
       <button class="chip" type="button" data-drink="Mocktail"      onclick="pickDrink('Mocktail')">🍹 Mocktail</button>
       <button class="chip" type="button" data-drink="Hot Chocolate" onclick="pickDrink('Hot Chocolate')">☕ Hot Chocolate</button>
-      <button class="chip" type="button" data-drink="Fresh Juice"   onclick="pickDrink('Fresh Juice')">🍊 Fresh Juice</button>
+      <button class="chip" type="button" id="dynamicDrinkChip" data-drink="Fresh Juice"   onclick="pickDrink(document.getElementById('dynamicDrinkChip').dataset.drink)">🍊 Fresh Juice</button>
       <button class="chip" type="button" data-drink="Lassi"         onclick="pickDrink('Lassi')">🥛 Lassi</button>
     </div>
     <p class="sec-title">Add food</p>
@@ -567,13 +1044,124 @@ function pickVibe(v){
   document.getElementById('heroTitle').textContent=cp.title;
   document.getElementById('heroSub').textContent=cp.sub;
   burst(); validate();
-  /* ✨ Dispatch vibe-specific cinematic animation */
+
+  /* ══ DYNAMIC SIP OPTION ══
+     Friends → Beer 🍺   MTF → Wine 🍷   Parents/Siblings → Fresh Juice 🍊
+     Swaps the chip label/emoji/value in place of the old "Fresh Juice" slot. */
+  const drinkMap = {
+    friends : { label:'Beer',        emoji:'🍺' },
+    mtf     : { label:'Wine',        emoji:'🍷' },
+    parents : { label:'Fresh Juice', emoji:'🍊' },
+    siblings: { label:'Fresh Juice', emoji:'🍊' },
+  };
+  const chip = document.getElementById('dynamicDrinkChip');
+  if(chip){
+    const opt = drinkMap[v] || drinkMap.parents;
+    /* If the previously-selected drink was the swapped slot, update V.drink too */
+    if(V.drink===chip.dataset.drink) V.drink = opt.label;
+    chip.dataset.drink   = opt.label;
+    chip.textContent     = `${opt.emoji} ${opt.label}`;
+    chip.classList.toggle('selected', V.drink===opt.label);
+  }
+
+  /* ══ FULLY-AUTOMATIC ANIMATION FLOW ══
+     Animation plays → automatically calls vibeAnimDone() → 
+     beautiful ripple transition → step 2 opens.
+     NO skip button. NO user input needed.                    */
   if(!REDUCED){
     if(v==='mtf')      triggerRoseBloom();
     else if(v==='parents')  triggerHouseAnimation();
     else if(v==='friends')  triggerConstellationAnimation();
     else if(v==='siblings') triggerPuzzleAnimation();
+  } else {
+    /* Reduced motion: skip animation, go straight to step 2 */
+    setTimeout(()=>go(2), 400);
   }
+}
+
+/* ══════════════════════════════════════════════
+   CLEAN PAGE TRANSITION — no ripple circle, no emoji
+   Just a smooth dark fade that covers the switch invisibly
+══════════════════════════════════════════════ */
+function vibeAnimDone(){
+  if(cur !== 1) return; /* prevent double-fire */
+
+  /* Dark curtain fade */
+  const curtain = document.createElement('div');
+  curtain.style.cssText = `
+    position:fixed;inset:0;z-index:99998;
+    background:#000;opacity:0;
+    transition:opacity 0.35s ease;
+    pointer-events:none;
+  `;
+  document.body.appendChild(curtain);
+
+  /* Fade in curtain */
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    curtain.style.opacity = '1';
+  }));
+
+  /* Switch page at peak darkness, then fade curtain out */
+  setTimeout(()=>{
+    go(2);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      curtain.style.transition = 'opacity 0.45s ease';
+      curtain.style.opacity = '0';
+    }));
+  }, 380);
+
+  /* Remove curtain */
+  setTimeout(()=>{ if(curtain.parentNode) curtain.remove(); }, 900);
+}
+
+/* Stub — no skip button */
+function showAnimSkip(){}
+function hideAnimSkip(){
+  const s=document.getElementById('animSkipBtn');
+  if(s) s.remove();
+}
+
+/* Emergency stop for all animations (used by Skip) */
+function stopAllAnimations(){
+  /* MTF */
+  if(mtfRAF){ cancelAnimationFrame(mtfRAF); mtfRAF=null; }
+  const ms=document.getElementById('mtf-stage');
+  if(ms){ ms.classList.remove('active');
+    const bd=document.getElementById('mtf-backdrop'); if(bd)bd.classList.remove('dimmed');
+    const sp=document.getElementById('mtf-spotlight'); if(sp)sp.classList.remove('on');
+    const md=document.getElementById('mtf-message'); if(md)md.innerHTML=''; }
+  mtfActive=false;
+
+  /* House */
+  if(houseRAF){ cancelAnimationFrame(houseRAF); houseRAF=null; }
+  if(_houseDisRAF){ cancelAnimationFrame(_houseDisRAF); _houseDisRAF=null; }
+  const hs=document.getElementById('house-stage');
+  if(hs){ hs.classList.remove('active');
+    const hc=document.getElementById('house-canvas'); if(hc)hc.getContext('2d').clearRect(0,0,hc.width,hc.height);
+    const hg=document.getElementById('house-glow'); if(hg)hg.style.opacity='0';
+    const hm=document.getElementById('house-message'); if(hm)hm.innerHTML=''; }
+  houseActive=false; _houseElements=null;
+
+  /* Constellation */
+  const cs=document.getElementById('constellation-stage');
+  if(cs){ cs.classList.remove('active');
+    const cc=document.getElementById('constellation-canvas'); if(cc)cc.getContext('2d').clearRect(0,0,cc.width,cc.height);
+    const fm=document.getElementById('friends-message'); if(fm)fm.innerHTML=''; }
+  constellationActive=false;
+
+  /* Siblings / puzzle */
+  const ps=document.getElementById('puzzle-stage');
+  if(ps){ ps.classList.remove('active');
+    const pc=document.getElementById('puzzle-canvas'); if(pc)pc.getContext('2d').clearRect(0,0,pc.width,pc.height);
+    const pg=document.getElementById('puzzle-glow'); if(pg)pg.style.opacity='0';
+    const cl=document.getElementById('sib-clapper'); if(cl){cl.className='';cl.style.display='';}
+    const tc=document.getElementById('sibTitleCard'); if(tc)tc.classList.remove('show');
+    const qe=document.getElementById('sibQuote'); if(qe){qe.textContent='';qe.classList.remove('typed','done');}
+    const se=document.getElementById('sibSign'); if(se)se.classList.remove('show');
+  }
+  puzzleActive=false;
+  /* Remove leftover DOM emoji */
+  document.querySelectorAll('[style*="sibEmojiFly"]').forEach(el=>el.remove());
 }
 
 function pickDrink(d){V.drink=d;document.querySelectorAll('[data-drink]').forEach(c=>c.classList.toggle('selected',c.dataset.drink===d));burst();validate()}
@@ -721,6 +1309,18 @@ function resetApp(){
   const nb=document.getElementById('nextBtn');nb.style.display='block';nb.disabled=true;
   /* reset animation flags */
   roseActive=false;houseActive=false;constellationActive=false;puzzleActive=false;
+  /* Reset siblings DOM */
+  const tc=document.getElementById('sibTitleCard');
+  const qe=document.getElementById('sibQuote');
+  const se=document.getElementById('sibSign');
+  const cl=document.getElementById('sib-clapper');
+  if(tc){tc.classList.remove('show');}
+  if(qe){qe.textContent='';qe.classList.remove('typed','done');}
+  if(se){se.classList.remove('show');}
+  if(cl){cl.className='';cl.style.display='';}
+  /* Reset dynamic drink chip back to default Fresh Juice */
+  const ddc=document.getElementById('dynamicDrinkChip');
+  if(ddc){ ddc.dataset.drink='Fresh Juice'; ddc.textContent='🍊 Fresh Juice'; }
   go(1);
 }
 
@@ -916,284 +1516,1431 @@ document.documentElement.style.scrollBehavior='smooth';
    Section D: Siblings — Puzzle Heart
 ══════════════════════════════════════════════════════════════════ */
 
-/* ─────────────────────────────────────────────────────────────────
-   SECTION A — MTF: ROSE BLOOM + PETAL BLAST
-───────────────────────────────────────────────────────────────── */
-let roseActive=false;
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION A — MTF: PREMIUM CINEMATIC ROSE ANIMATION
+   ───────────────────────────────────────────────────────────────────────
+   Scene 1 (0 – 1.4s)  Cinematic dim + spotlight + soft bokeh particles
+   Scene 2 (1.4 – 4.2s) Rose bud emerges: stem grows, leaves unfurl, bud swells
+   Scene 3 (4.2 – 7s)   Slow-motion bloom: petals open one by one, depth-of-field glow
+   Scene 4 (7 – 9.5s)   Rose EXPLODES → 300 petals with gravity, wind, motion blur
+   Scene 5 (9.5 – 13s)  Romantic message fades in over floating petals + fireflies
+   Scene 6 (13 – 15s)   Graceful fade-out, website returns
+   ─────────────────────────────────────────────────────────────────────── */
 
-function triggerRoseBloom(){
-  if(REDUCED||roseActive)return;
-  roseActive=true;
-  const stage=document.getElementById('rose-stage');
-  const wrap=document.getElementById('roseSvgWrap');
-  const stem=document.getElementById('roseStem');
-  const leafL=document.getElementById('roseLeafL'),leafR=document.getElementById('roseLeafR');
-  const bloom=document.getElementById('roseBloom'),halo=document.getElementById('roseHalo');
+let mtfActive = false;
+let mtfRAF    = null;
+
+/* Alias — existing pickVibe('mtf') calls this */
+function triggerRoseBloom(){ triggerMTFCinematic(); }
+
+function triggerMTFCinematic(){
+  if(REDUCED || mtfActive) return;
+  mtfActive = true;
+
+  /* ── DOM refs ── */
+  const stage    = document.getElementById('mtf-stage');
+  const backdrop = document.getElementById('mtf-backdrop');
+  const spotlight= document.getElementById('mtf-spotlight');
+  const canvas   = document.getElementById('mtf-canvas');
+  const msgDiv   = document.getElementById('mtf-message');
+  const ctx      = canvas.getContext('2d');
+
   stage.classList.add('active');
-  /* Reset */
-  wrap.style.cssText='opacity:0;transition:none;position:absolute;bottom:-20px;left:50%;transform:translateX(-50%) scale(0.4);transform-origin:bottom center;width:160px';
-  stem.style.strokeDashoffset='180';leafL.style.opacity='0';leafR.style.opacity='0';bloom.style.opacity='0';halo.style.opacity='0';halo.style.transform='translateX(-50%) scale(0)';
-  /* Phases */
-  requestAnimationFrame(()=>{wrap.style.transition='opacity .4s ease,transform .6s cubic-bezier(.2,.9,.2,1)';wrap.style.opacity='1';wrap.style.transform='translateX(-50%) scale(1)';});
-  setTimeout(()=>{stem.style.transition='stroke-dashoffset 0.9s cubic-bezier(.4,0,.2,1)';stem.style.strokeDashoffset='0';},300);
-  setTimeout(()=>{leafL.style.transition='opacity .4s ease';leafL.style.opacity='1';},900);
-  setTimeout(()=>{leafR.style.transition='opacity .4s ease';leafR.style.opacity='1';},1100);
-  setTimeout(()=>{bloom.style.transition='opacity .5s ease';bloom.style.opacity='1';},1300);
-  setTimeout(()=>{halo.style.transition='opacity .6s ease,transform .6s cubic-bezier(.2,.9,.2,1)';halo.style.opacity='1';halo.style.transform='translateX(-50%) scale(1.4)';},1500);
-  setTimeout(()=>{wrap.style.transition='transform .5s cubic-bezier(.2,.9,.2,1)';wrap.style.transform='translateX(-50%) scale(1.18)';},1700);
-  setTimeout(()=>{
-    wrap.style.transition='opacity .25s ease,transform .25s ease';wrap.style.opacity='0';wrap.style.transform='translateX(-50%) scale(1.4)';halo.style.opacity='0';
-    spawnRoseBlast(window.innerWidth/2,window.innerHeight*0.72);
-    setTimeout(()=>{stage.classList.remove('active');roseActive=false;},5000);
-  },2100);
-}
+  msgDiv.innerHTML = '';
 
-function spawnRoseBlast(cx,cy){
-  const PC=IS_MOBILE?60:160;
-  const EMOJIS=['🌸','🌹','🌺','❤️','💕'];
-  const frag=document.createDocumentFragment();const petals=[];
-  for(let i=0;i<PC;i++){
-    const el=document.createElement('div');el.className='petal';
-    if(i%5===0){el.textContent=EMOJIS[Math.floor(Math.random()*EMOJIS.length)];el.style.fontSize=(10+Math.random()*18)+'px';}
-    else{const s=8+Math.random()*14;el.style.cssText+=`width:${s}px;height:${s*1.6}px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:hsl(${330+Math.random()*40}deg,90%,${55+Math.random()*20}%);box-shadow:0 0 6px rgba(255,79,139,.5);`;}
-    const angle=Math.random()*Math.PI*2,speed=3+Math.random()*9;
-    const vx=Math.cos(angle)*speed,vy=Math.sin(angle)*speed-(2+Math.random()*5);
-    const rot=Math.random()*720-360,scale0=0.6+Math.random()*0.8,life=2200+Math.random()*2600;
-    el.style.position='fixed';el.style.left=cx+'px';el.style.top=cy+'px';el.style.zIndex='201';el.style.pointerEvents='none';el.style.willChange='transform,opacity';el.style.opacity='0';
-    frag.appendChild(el);petals.push({el,vx,vy,x:cx,y:cy,rot:0,rotV:rot/(life/16),scale:scale0,life,born:performance.now()});
-  }
-  document.body.appendChild(frag);
-  const GRAV=0.22,WIND=(Math.random()-.5)*0.06;let alive=petals.length;
-  function physLoop(ts){
-    if(alive===0)return;
-    petals.forEach(p=>{if(p.dead)return;const age=ts-p.born,t=age/p.life;if(t>=1){p.el.style.opacity='0';p.el.remove();p.dead=true;alive--;return;}
-      const op=t<.12?(t/.12):Math.max(0,1-(t-.12)/.88);p.vy+=GRAV;p.vx+=WIND;p.vx*=0.995;p.x+=p.vx;p.y+=p.vy;p.rot+=p.rotV;
-      const spd=Math.hypot(p.vx,p.vy),blur=Math.min(spd*.06,2);
-      p.el.style.opacity=op;p.el.style.transform=`translate(${p.x-cx}px,${p.y-cy}px) rotate(${p.rot}deg) scale(${p.scale})`;p.el.style.filter=`blur(${blur}px) drop-shadow(0 0 3px rgba(255,79,139,.4))`;
-    });requestAnimationFrame(physLoop);
-  }
-  requestAnimationFrame(physLoop);
-  /* Floaters */
-  const FL=IS_MOBILE?8:20;
-  for(let i=0;i<FL;i++){setTimeout(()=>{
-    const el=document.createElement('div');el.className='petal';const s=6+Math.random()*10;
-    el.style.cssText=`position:fixed;pointer-events:none;z-index:200;will-change:transform,opacity;width:${s}px;height:${s*1.6}px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:hsl(${330+Math.random()*40}deg,88%,${60+Math.random()*18}%);left:${20+Math.random()*60}vw;top:-10px;opacity:0`;
-    document.body.appendChild(el);
-    const life2=4500+Math.random()*3000,dx=(Math.random()-.5)*200;let s2=null;
-    function fp(ts){if(!s2)s2=ts;const t=(ts-s2)/life2;if(t>=1){el.remove();return;}
-      const op=t<.1?t/.1:Math.max(0,1-(t-.1)/.9);el.style.opacity=op;
-      el.style.transform=`translate(${Math.sin(t*Math.PI*3)*60+dx*t}px,${t*window.innerHeight*1.3}px) rotate(${t*360}deg)`;
-      requestAnimationFrame(fp);}
-    requestAnimationFrame(fp);
-  },i*120+400);}
-}
+  /* ── Canvas sizing ── */
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const W  = canvas.width;
+  const H  = canvas.height;
+  const CX = W * 0.5;
+  const CY = H * 0.46;
+  const SC = Math.min(1.5, Math.max(0.55, Math.min(W, H) / 480));
+  const PB = IS_MOBILE ? 0.55 : 1.0;
 
+  /* ── Easing helpers ── */
+  const eOut3  = t => 1 - Math.pow(1 - t, 3);
+  const eOut5  = t => 1 - Math.pow(1-t, 5);
+  const eOutBk = (t, s=1.5) => { const c3 = s+1; return 1 + c3*Math.pow(t-1,3) + s*Math.pow(t-1,2); };
+  const eInOut = t => t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
 
-/* ─────────────────────────────────────────────────────────────────
-   SECTION B — PARENTS: WOODEN HOUSE ASSEMBLY
-   Canvas-based physics: planks fly from edges → assemble → glow.
-   On reset, planks scatter back out.
-───────────────────────────────────────────────────────────────── */
-let houseActive=false;
-let houseRAF=null;
-let housePhase='idle'; /* idle | assemble | glow | disassemble */
+  /* ══════════════════════════════════════════════
+     SCENE TIMESTAMPS  (milliseconds)
+     Scene 1: dim + spotlight + bokeh
+     Scene 2: hundreds of tiny pink hearts fly in from all edges
+               and assemble into one giant heart outline
+     Scene 3: heart glows, beats, fills solid with gradient
+     Scene 4: heart explodes into a shower of pink/red hearts
+     Scene 5: romantic message card rises through floating hearts
+     Scene 6: fade out, auto-advance
+  ════════════════════════════════════════════════ */
+  const S = {
+    dim        : 0,
+    spotlight  : 300,
+    bokeh      : 400,
+    heartsStart: 700,
+    assembled  : 3000,    /* estimated, also checked dynamically */
+    glowPulse  : 3000,
+    explode    : 6200,    /* was 4600 — heart now glows/beats for ~3.2s before exploding */
+    message    : 7800,    /* was 6200 */
+    firefly    : 8000,    /* was 6400 */
+    fadeOut    : 13500,   /* was 8400 — message now stays readable ~5.7s */
+    done       : 15200,   /* was 9600 — total runtime extended */
+  };
 
-function triggerHouseAnimation(){
-  if(REDUCED||houseActive)return;
-  houseActive=true;
-  const stage=document.getElementById('house-stage');
-  const canvas=document.getElementById('house-canvas');
-  const glowEl=document.getElementById('house-glow');
-  const ctx=canvas.getContext('2d');
-  stage.classList.add('active');
-  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
-
-  const CX=canvas.width/2,CY=canvas.height/2;
-  const SC=IS_MOBILE?0.62:0.85; /* scale factor */
-
-  /* ── Define house parts (target polygons, canvas coords) ── */
-  /* All coords relative to centre, then scaled */
-  function P(x,y){return[CX+x*SC,CY+y*SC];}
-
-  /* House target positions */
-  const houseParts=[
-    /* 0: Left wall */
-    {pts:[P(-110,60),P(-110,-40),P(-10,-40),P(-10,60)],color:'#8B6914',label:'wallL'},
-    /* 1: Right wall */
-    {pts:[P(10,60),P(10,-40),P(110,-40),P(110,60)],color:'#9B7A1E',label:'wallR'},
-    /* 2: Centre join */
-    {pts:[P(-12,60),P(-12,-40),P(12,-40),P(12,60)],color:'#7A5C10',label:'wallC'},
-    /* 3: Roof left slope */
-    {pts:[P(-120,-38),P(0,-120),P(0,-38)],color:'#5C2A05',label:'roofL'},
-    /* 4: Roof right slope */
-    {pts:[P(0,-120),P(120,-38),P(0,-38)],color:'#6B3206',label:'roofR'},
-    /* 5: Chimney */
-    {pts:[P(50,-120),P(70,-120),P(70,-155),P(50,-155)],color:'#3D1F03',label:'chimney'},
-    /* 6: Door */
-    {pts:[P(-22,60),P(-22,0),P(22,0),P(22,60)],color:'#4B2800',label:'door'},
-    /* 7: Window left */
-    {pts:[P(-95,-5),P(-95,-30),P(-65,-30),P(-65,-5)],color:'#FFFAD6',label:'winL'},
-    /* 8: Window right */
-    {pts:[P(65,-5),P(65,-30),P(95,-30),P(95,-5)],color:'#FFFAD6',label:'winR'},
-    /* 9: Foundation / ground line */
-    {pts:[P(-115,62),P(115,62),P(115,70),P(-115,70)],color:'#6B4A0A',label:'ground'},
-  ];
-
-  /* Compute centroid of each part */
-  function centroid(pts){
-    let sx=0,sy=0;pts.forEach(([x,y])=>{sx+=x;sy+=y;});return[sx/pts.length,sy/pts.length];
+  /* ── Heart geometry (parametric heart curve) ── */
+  function heartPt(t, scaleMul=1){
+    const x = 16 * Math.pow(Math.sin(t),3) * 10.5 * SC * scaleMul;
+    const y = -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t)) * 10.5 * SC * scaleMul;
+    return [CX+x, CY+y];
   }
 
-  /* Each plank starts off-screen at a random edge */
-  const planks=houseParts.map((part,i)=>{
-    const [tx,ty]=centroid(part.pts);
-    /* spawn position: random edge of viewport */
-    const edge=Math.floor(Math.random()*4);
-    let sx,sy;
-    if(edge===0){sx=Math.random()*canvas.width;sy=-100;}        /* top */
-    else if(edge===1){sx=canvas.width+100;sy=Math.random()*canvas.height;} /* right */
-    else if(edge===2){sx=Math.random()*canvas.width;sy=canvas.height+100;} /* bottom */
-    else{sx=-100;sy=Math.random()*canvas.height;}               /* left */
-    const startAngle=(Math.random()-0.5)*Math.PI*2;
-    return{
-      part,
-      tx,ty,            /* target centroid */
-      sx,sy,            /* spawn centroid */
-      cx:sx,cy:sy,      /* current centroid */
-      angle:startAngle, /* current rotation */
-      targetAngle:0,    /* final rotation */
-      progress:0,       /* 0→1 assembly progress */
-      delay:i*120+400,  /* stagger ms */
-      born:null,        /* set when anim starts */
-      settled:false,
-    };
-  });
+  /* ════════════════════════════════════════════
+     PARTICLE SYSTEMS
+  ════════════════════════════════════════════ */
 
-  /* ── Draw one plank at current interpolated position ── */
-  function drawPlank(plank,t){
-    const {part,tx,ty,sx,sy,angle,targetAngle}=plank;
-    /* Ease */
-    const ease=1-Math.pow(1-t,3);
-    const cx=sx+(tx-sx)*ease;
-    const cy=sy+(ty-sy)*ease;
-    const rot=angle+(targetAngle-angle)*ease;
-    ctx.save();
-    ctx.translate(cx,cy);
-    ctx.rotate(rot);
-    /* Draw polygon relative to centroid */
-    ctx.beginPath();
-    const pts=part.pts;
-    pts.forEach(([px,py],i)=>{
-      const lx=px-tx,ly=py-ty;
-      if(i===0)ctx.moveTo(lx,ly);else ctx.lineTo(lx,ly);
+  /* 1. Bokeh circles (soft out-of-focus lights) */
+  const BOKEH_N = IS_MOBILE ? 16 : 34;
+  const bokehPts = Array.from({length:BOKEH_N}, () => ({
+    x: Math.random()*W, y: Math.random()*H,
+    r: 20 + Math.random()*60,
+    hue: 320 + Math.random()*50,
+    alpha: 0, targetAlpha: 0.04 + Math.random()*0.07,
+    driftX: (Math.random()-0.5)*0.25, driftY: (Math.random()-0.5)*0.12,
+    phase: Math.random()*Math.PI*2, speed: 0.006 + Math.random()*0.008,
+  }));
+
+  /* 2. Mini hearts that fly in and ASSEMBLE the big heart outline */
+  const HEART_N = Math.round((IS_MOBILE ? 60 : 110) * PB);
+  const miniHearts = [];
+  for(let i=0;i<HEART_N;i++){
+    const t = (i/HEART_N)*Math.PI*2;
+    const [tx,ty] = heartPt(t, 1);
+
+    /* random spawn edge */
+    const edge = Math.floor(Math.random()*4);
+    let spx,spy;
+    if(edge===0){ spx=Math.random()*W;      spy=-80; }
+    else if(edge===1){ spx=W+80;            spy=Math.random()*H; }
+    else if(edge===2){ spx=Math.random()*W; spy=H+80; }
+    else            { spx=-80;              spy=Math.random()*H; }
+
+    const hueChoice = [340,350,330,355,345][i%5];
+    miniHearts.push({
+      tx, ty, spx, spy,
+      x: spx, y: spy,
+      size: (5 + Math.random()*5) * SC,
+      hue: hueChoice,
+      angle: (Math.random()-0.5)*Math.PI*2,
+      rotV: (Math.random()-0.5)*0.18,
+      delay: S.heartsStart + i*22 + Math.random()*60,
+      flyDur: 600 + Math.random()*280,
+      progress: 0,
+      landed: false,
+      trail: [],
     });
-    ctx.closePath();
-    /* Wood grain effect: slight gradient */
-    const grd=ctx.createLinearGradient(-60,-60,60,60);
-    grd.addColorStop(0,part.color);
-    grd.addColorStop(0.5,lighten(part.color,20));
-    grd.addColorStop(1,part.color);
-    ctx.fillStyle=(part.part.label==='winL'||part.part.label==='winR')?part.color:grd;
+  }
+
+  /* 3. Landing sparkle bursts when a mini heart lands */
+  const sparkBursts = [];
+  function spawnSparkBurst(x,y,hue){
+    const n = IS_MOBILE ? 3 : 6;
+    for(let k=0;k<n;k++){
+      const a = Math.random()*Math.PI*2;
+      const spd = 1+Math.random()*2.5;
+      sparkBursts.push({
+        x,y, vx:Math.cos(a)*spd, vy:Math.sin(a)*spd,
+        life:0, maxLife:22+Math.random()*16, r:1+Math.random()*1.8, hue,
+      });
+    }
+  }
+
+  /* 4. Ambient floating dust around the heart while it glows */
+  const heartDust = [];
+  function spawnHeartDust(x,y,hue){
+    heartDust.push({
+      x,y, vx:(Math.random()-0.5)*0.7, vy:-(0.3+Math.random()*0.7),
+      life:0, maxLife:55+Math.random()*45, r:0.8+Math.random()*2, hue,
+    });
+  }
+
+  /* 5. Explosion hearts — the big shatter (small heart shapes, not petals) */
+  const EXPLODE_N = Math.round((IS_MOBILE ? 140 : 280) * PB);
+  let explodeHearts = [];
+  function buildExplodeHearts(){
+    explodeHearts = Array.from({length:EXPLODE_N}, (_, i) => {
+      const angle = Math.random()*Math.PI*2;
+      const spd   = 2 + Math.random()*12;
+      const hue   = [340,350,330,355,5,20][i%6]; /* pinks/reds + gold accent */
+      const nearCamera = Math.random() < 0.10;
+      return {
+        x  : CX + (Math.random()-0.5)*30*SC,
+        y  : CY + (Math.random()-0.5)*30*SC,
+        vx : Math.cos(angle)*spd + (Math.random()-0.5)*3,
+        vy : Math.sin(angle)*spd - (2 + Math.random()*5),
+        rot: Math.random()*Math.PI*2,
+        rotV: (Math.random()-0.5) * (nearCamera ? 0.3 : 0.14),
+        size: (4 + Math.random()*9) * SC,
+        hue, sat: 82+Math.random()*18, lit: 55+Math.random()*25,
+        alpha: 1, life: 0,
+        maxLife: nearCamera ? 70+Math.random()*50 : 190+Math.random()*200,
+        scale: nearCamera ? 2.4+Math.random()*1.6 : 0.7+Math.random()*0.9,
+        nearCamera,
+        wind: (Math.random()-0.5)*0.04,
+      };
+    });
+  }
+
+  /* 6. Slow-drift floater hearts (post-explosion, float up & around) */
+  const floaterHearts = [];
+  function spawnFloaterHeart(){
+    floaterHearts.push({
+      x  : 5 + Math.random()*(W-10),
+      y  : H + 20,
+      vx : (Math.random()-0.5)*0.8,
+      vy : -(0.5 + Math.random()*1.0),
+      rot: Math.random()*Math.PI*2,
+      rotV: (Math.random()-0.5)*0.05,
+      size: (4+Math.random()*9)*SC,
+      hue: [340,350,330,5][Math.floor(Math.random()*4)],
+      sat: 82+Math.random()*16, lit: 56+Math.random()*22,
+      life: 0, maxLife: 260+Math.random()*160,
+      alpha: 0, sway: Math.random()*Math.PI*2,
+    });
+  }
+
+  /* 7. Fireflies */
+  const FF_N = Math.round((IS_MOBILE ? 14 : 32) * PB);
+  const fireflies = Array.from({length:FF_N}, () => ({
+    x: Math.random()*W, y: H*0.25 + Math.random()*H*0.6,
+    r: 1.4 + Math.random()*2.3,
+    vx: (Math.random()-0.5)*0.45, vy: (Math.random()-0.5)*0.3,
+    phase: Math.random()*Math.PI*2, blink: 0.025 + Math.random()*0.03,
+    hue: 40 + Math.random()*20, alpha: 0,
+  }));
+
+  /* ════════════════════════════════════════════
+     STATE
+  ════════════════════════════════════════════ */
+  let allHeartsSettled = false;
+  let heartGlowPhase   = 0;
+  let heartBeatT       = 0;
+  let explodeTriggered = false;
+  let fireflyActive    = false;
+  let letterShown      = false;
+
+  /* ── Scene 1: dim + spotlight ── */
+  setTimeout(()=>{ backdrop.classList.add('dimmed'); }, 100);
+  setTimeout(()=>{ spotlight.classList.add('on'); }, S.spotlight);
+
+  /* ════════════════════════════════════════════
+     DRAW HELPERS
+  ════════════════════════════════════════════ */
+
+  /* Draw a single small heart shape (filled, glowing) */
+  function drawMiniHeart(cx, cy, size, hue, rot, alpha, sat=85, lit=62){
+    if(alpha<=0) return;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rot);
+    ctx.globalAlpha = alpha;
+    ctx.shadowBlur = size*1.4;
+    ctx.shadowColor = `hsla(${hue},90%,60%,0.7)`;
+    const g = ctx.createRadialGradient(0,-size*0.3,0, 0,size*0.4,size*1.6);
+    g.addColorStop(0, `hsl(${hue},${sat}%,${Math.min(lit+18,92)}%)`);
+    g.addColorStop(0.55, `hsl(${hue},${sat}%,${lit}%)`);
+    g.addColorStop(1, `hsl(${hue},${sat}%,${Math.max(lit-15,25)}%)`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(0, size*0.62);
+    ctx.bezierCurveTo(size*1.05, -size*0.18, size*0.55, -size*1.0, 0, -size*0.32);
+    ctx.bezierCurveTo(-size*0.55, -size*1.0, -size*1.05, -size*0.18, 0, size*0.62);
     ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=1.5;ctx.stroke();
+    /* shine */
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,255,0.30)';
+    ctx.beginPath();
+    ctx.ellipse(-size*0.22, -size*0.42, size*0.18, size*0.26, -0.5, 0, Math.PI*2);
+    ctx.fill();
     ctx.restore();
   }
 
-  function lighten(hex,amt){
-    const n=parseInt(hex.slice(1),16);
-    const r=Math.min(255,((n>>16)&0xff)+amt);
-    const g=Math.min(255,((n>>8)&0xff)+amt);
-    const b=Math.min(255,(n&0xff)+amt);
-    return`rgb(${r},${g},${b})`;
+  /* Draw the giant assembled heart silhouette + golden glow behind it */
+  function drawBigHeartGlow(alpha, beatScale=1){
+    if(alpha<=0) return;
+    const R = 95*SC*beatScale;
+    ctx.save();
+    ctx.translate(CX, CY);
+    const halo = ctx.createRadialGradient(0,0,0, 0,0, R*2.1);
+    halo.addColorStop(0, `rgba(255,160,190,${alpha*0.30})`);
+    halo.addColorStop(0.4, `rgba(255,90,140,${alpha*0.16})`);
+    halo.addColorStop(0.75, `rgba(255,215,80,${alpha*0.08})`);
+    halo.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath(); ctx.arc(0,0,R*2.1,0,Math.PI*2); ctx.fill();
+    ctx.restore();
   }
 
-  /* ── Window warm-glow overlay ── */
-  function drawWindowGlow(alpha){
-    [[P(-80,-17.5)],[P(80,-17.5)]].forEach(([[wx,wy]])=>{
-      const grd=ctx.createRadialGradient(wx,wy,2,wx,wy,40*SC);
-      grd.addColorStop(0,`rgba(255,220,100,${alpha*0.6})`);
-      grd.addColorStop(1,'rgba(255,180,50,0)');
-      ctx.fillStyle=grd;ctx.beginPath();ctx.arc(wx,wy,40*SC,0,Math.PI*2);ctx.fill();
-    });
-    /* chimney smoke wisps */
-    if(alpha>0.5){
-      const smokeX=CX+60*SC,smokeY=CY-155*SC;
-      for(let s=0;s<3;s++){
-        const sy=smokeY-s*18*SC*alpha;const sa=(0.18-s*0.05)*alpha;
-        const sg=ctx.createRadialGradient(smokeX,sy,0,smokeX,sy,14*SC);
-        sg.addColorStop(0,`rgba(200,200,200,${sa})`);sg.addColorStop(1,'rgba(200,200,200,0)');
-        ctx.fillStyle=sg;ctx.beginPath();ctx.arc(smokeX+s*4*SC,sy,14*SC,0,Math.PI*2);ctx.fill();
-      }
+  /* ════════════════════════════════════════════
+     ROMANTIC MESSAGE CARD
+  ════════════════════════════════════════════ */
+  function showRomanticMessage(){
+    if(letterShown) return;
+    letterShown = true;
+    const card = document.createElement('div');
+    card.className = 'mtf-msg-card';
+    card.innerHTML = `
+      <span class="mtf-msg-heart" role="img" aria-label="heart">💖</span>
+      <div class="mtf-msg-line" id="mtfL1">Every little moment</div>
+      <div class="mtf-msg-main mtf-msg-line" id="mtfL2">feels magical with you</div>
+      <div class="mtf-msg-line" id="mtfL3">You're more than a friend,</div>
+      <div class="mtf-msg-line" id="mtfL4">you're my favourite person. 💕</div>
+      <div class="mtf-msg-sign" id="mtfSign">— More Than Friends</div>
+    `;
+    msgDiv.appendChild(card);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      card.classList.add('show');
+      ['mtfL1','mtfL2','mtfL3','mtfL4'].forEach((id,i)=>{
+        setTimeout(()=>{
+          const el=document.getElementById(id);
+          if(el) el.classList.add('typed');
+        }, 350 + i*620);
+      });
+      setTimeout(()=>{
+        const s=document.getElementById('mtfSign');
+        if(s) s.classList.add('show');
+      }, 3400);
+    }));
+  }
+
+  /* ════════════════════════════════════════════
+     MAIN ANIMATION LOOP
+  ════════════════════════════════════════════ */
+  const T0 = performance.now();
+
+  function mtfLoop(ts){
+    const elapsed = ts - T0;
+
+    /* ── Clear + cinematic dark overlay ── */
+    ctx.clearRect(0,0,W,H);
+    const dimAlpha = Math.min(elapsed/900, 1) * 0.82;
+    ctx.fillStyle  = `rgba(8,1,16,${dimAlpha})`;
+    ctx.fillRect(0,0,W,H);
+
+    const masterAlpha = elapsed > S.fadeOut
+      ? Math.max(0, 1-(elapsed-S.fadeOut)/(S.done-S.fadeOut))
+      : 1;
+
+    /* ── Scene 1: bokeh particles ── */
+    if(elapsed >= S.bokeh){
+      const bt = Math.min((elapsed-S.bokeh)/2000, 1);
+      bokehPts.forEach(b => {
+        b.phase += b.speed; b.alpha += (b.targetAlpha - b.alpha)*0.03;
+        const a = b.alpha * bt * masterAlpha;
+        if(a < 0.005) return;
+        b.x += b.driftX; b.y += b.driftY;
+        if(b.x < -b.r) b.x = W+b.r; if(b.x > W+b.r) b.x = -b.r;
+        if(b.y < -b.r) b.y = H+b.r; if(b.y > H+b.r) b.y = -b.r;
+        const pulse = 0.7 + 0.3*Math.sin(b.phase);
+        const grd = ctx.createRadialGradient(b.x,b.y,0, b.x,b.y,b.r*pulse);
+        grd.addColorStop(0,`hsla(${b.hue},90%,75%,${a})`);
+        grd.addColorStop(0.4,`hsla(${b.hue},80%,60%,${a*0.4})`);
+        grd.addColorStop(1,`hsla(${b.hue},70%,50%,0)`);
+        ctx.fillStyle = grd;
+        ctx.beginPath(); ctx.arc(b.x,b.y,b.r*pulse,0,Math.PI*2); ctx.fill();
+      });
     }
-  }
 
-  /* ── Main animation loop ── */
-  const animStart=performance.now();
-  let glowAlpha=0;
+    /* ── Scene 2: mini hearts fly in & assemble big heart ── */
+    if(!explodeTriggered){
+      let settled = true;
+      miniHearts.forEach(h => {
+        const he = elapsed - h.delay;
+        if(he < 0){ settled=false; return; }
+        const t = Math.min(he/h.flyDur, 1);
+        if(t < 1) settled = false;
+        h.progress = t;
+        const ease = eOutBk(t, 1.35);
+        h.x = h.spx + (h.tx - h.spx)*ease;
+        h.y = h.spy + (h.ty - h.spy)*ease;
+        const rot = h.angle*(1-eOut5(t));
 
-  function houseLoop(ts){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    let allSettled=true;
-    planks.forEach(plank=>{
-      const elapsed=ts-animStart-plank.delay;
-      if(elapsed<0){allSettled=false;return;} /* not started yet */
-      const t=Math.min(elapsed/900,1); /* 900ms per plank */
-      plank.progress=t;
-      if(t<1)allSettled=false;
-      drawPlank(plank,t);
-    });
-
-    /* Once all settled, draw glow */
-    if(allSettled){
-      glowAlpha=Math.min(glowAlpha+0.015,1);
-      drawWindowGlow(glowAlpha);
-      /* Enable CSS glow behind canvas */
-      glowEl.style.opacity=String(glowAlpha*0.9);
-      if(glowAlpha>=1){
-        /* Hold for 3s then disassemble */
-        if(!houseGlowTimer){
-          houseGlowTimer=setTimeout(()=>{
-            houseDisassemble(planks,ctx,canvas,stage,glowEl);
-          },3000);
+        if(t>=0.97 && !h.landed){
+          h.landed = true;
+          spawnSparkBurst(h.tx, h.ty, h.hue);
         }
+
+        ctx.globalAlpha = masterAlpha;
+        drawMiniHeart(h.x, h.y, h.size, h.hue, rot, Math.min(t*2.2,1), 88, 60);
+      });
+      ctx.globalAlpha = 1;
+
+      if(settled && !allHeartsSettled){
+        allHeartsSettled = true;
       }
     }
-    houseRAF=requestAnimationFrame(houseLoop);
+
+    /* ── Scene 3: glow + beat pulse on assembled heart ── */
+    if(allHeartsSettled && !explodeTriggered){
+      heartGlowPhase = Math.min(heartGlowPhase + 0.018, 1);
+      heartBeatT += 0.05;
+      const beatScale = 1 + Math.sin(heartBeatT)*0.045*heartGlowPhase;
+
+      ctx.save();
+      ctx.translate(CX, CY);
+      ctx.scale(beatScale, beatScale);
+      ctx.translate(-CX, -CY);
+      ctx.globalAlpha = masterAlpha;
+      drawBigHeartGlow(heartGlowPhase, 1);
+      /* Redraw settled mini hearts slightly larger/brighter while pulsing */
+      miniHearts.forEach(h => {
+        drawMiniHeart(h.tx, h.ty, h.size*(1+heartGlowPhase*0.15), h.hue, 0, 1, 90, 62+heartGlowPhase*8);
+      });
+      ctx.restore();
+      ctx.globalAlpha = 1;
+
+      /* ambient dust drifting up off the heart */
+      if(Math.random()<0.12){
+        const a = Math.random()*Math.PI*2;
+        const [dx,dy] = heartPt(a, 0.9+Math.random()*0.2);
+        spawnHeartDust(dx, dy, [340,350,5][Math.floor(Math.random()*3)]);
+      }
+    }
+
+    /* ── Spark bursts from landings ── */
+    ctx.globalAlpha = masterAlpha;
+    for(let i=sparkBursts.length-1;i>=0;i--){
+      const sp = sparkBursts[i];
+      sp.x+=sp.vx; sp.y+=sp.vy; sp.vy+=0.05; sp.life++;
+      const a = Math.max(0,(1-sp.life/sp.maxLife))*0.9;
+      if(sp.life>=sp.maxLife){ sparkBursts.splice(i,1); continue; }
+      const g = ctx.createRadialGradient(sp.x,sp.y,0, sp.x,sp.y,sp.r*3);
+      g.addColorStop(0,`hsla(${sp.hue},95%,82%,${a})`);
+      g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(sp.x,sp.y,sp.r,0,Math.PI*2); ctx.fill();
+    }
+    /* ambient heart dust */
+    for(let i=heartDust.length-1;i>=0;i--){
+      const d = heartDust[i];
+      d.x+=d.vx; d.y+=d.vy; d.vy*=0.98; d.life++;
+      const a = d.life<15?(d.life/15)*0.7:Math.max(0,0.7*(1-(d.life-15)/(d.maxLife-15)));
+      if(d.life>=d.maxLife){ heartDust.splice(i,1); continue; }
+      ctx.globalAlpha = a*masterAlpha;
+      ctx.fillStyle = `hsl(${d.hue},90%,78%)`;
+      ctx.shadowBlur = 7; ctx.shadowColor = `hsl(${d.hue},90%,60%)`;
+      ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+
+    /* ── Scene 4: Explosion ── */
+    if(elapsed >= S.explode && !explodeTriggered){
+      explodeTriggered = true;
+      allHeartsSettled = false;
+      buildExplodeHearts();
+    }
+    if(explodeTriggered){
+      const GRAV = 0.18;
+      for(let i=explodeHearts.length-1;i>=0;i--){
+        const p = explodeHearts[i];
+        p.vx += p.wind; p.vx *= 0.994;
+        p.vy += GRAV;   p.vy *= 0.994;
+        p.x += p.vx; p.y += p.vy; p.rot += p.rotV; p.life++;
+        if(p.nearCamera) p.scale = Math.min(p.scale*1.01, 4.2);
+        const lt = p.life/p.maxLife;
+        p.alpha = lt<0.06 ? lt/0.06 : Math.max(0,1-(lt-0.06)/0.94);
+        if(p.life >= p.maxLife){ explodeHearts.splice(i,1); continue; }
+        ctx.globalAlpha = masterAlpha;
+        drawMiniHeart(p.x, p.y, p.size*p.scale, p.hue, p.rot, p.alpha, p.sat, p.lit);
+      }
+      ctx.globalAlpha = 1;
+
+      /* Slow floater hearts drifting up */
+      if(Math.random() < (IS_MOBILE?0.10:0.20) && floaterHearts.length < Math.round(60*PB)){
+        spawnFloaterHeart();
+      }
+      for(let i=floaterHearts.length-1;i>=0;i--){
+        const f = floaterHearts[i];
+        f.sway += 0.025;
+        f.x += f.vx + Math.sin(f.sway)*0.5;
+        f.y += f.vy;
+        f.rot += f.rotV;
+        f.life++;
+        f.alpha = f.life<30?(f.life/30):Math.max(0,1-(f.life-30)/(f.maxLife-30));
+        if(f.life >= f.maxLife || f.y < -40){ floaterHearts.splice(i,1); continue; }
+        ctx.globalAlpha = masterAlpha;
+        drawMiniHeart(f.x, f.y, f.size, f.hue, f.rot, f.alpha, f.sat, f.lit);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    /* ── Scene 5: Fireflies + message ── */
+    if(elapsed >= S.firefly && !fireflyActive) fireflyActive = true;
+    if(fireflyActive){
+      const ffT = Math.min((elapsed - S.firefly)/2000, 1);
+      fireflies.forEach(f => {
+        f.phase += f.blink;
+        f.x += f.vx + Math.sin(f.phase*0.7)*0.4;
+        f.y += f.vy + Math.cos(f.phase*0.5)*0.3;
+        if(f.x<0) f.x=W; if(f.x>W) f.x=0;
+        if(f.y<0||f.y>H) f.vy*=-1;
+        const blink = Math.max(0, Math.sin(f.phase));
+        const a = blink * ffT * 0.85 * masterAlpha;
+        if(a<0.02) return;
+        const grd = ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,f.r*6);
+        grd.addColorStop(0,`hsla(${f.hue},95%,85%,${a})`);
+        grd.addColorStop(0.4,`hsla(${f.hue},90%,65%,${a*0.5})`);
+        grd.addColorStop(1,`hsla(${f.hue},80%,50%,0)`);
+        ctx.fillStyle=grd;
+        ctx.beginPath();ctx.arc(f.x,f.y,f.r*6,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=`hsla(${f.hue},100%,95%,${a})`;
+        ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,Math.PI*2);ctx.fill();
+      });
+    }
+    if(elapsed >= S.message && !letterShown) showRomanticMessage();
+
+    /* ── Scene 6: fade out / auto-advance ── */
+    if(elapsed >= S.done){
+      const card = msgDiv.querySelector('.mtf-msg-card');
+      if(card) card.classList.remove('show');
+      backdrop.classList.remove('dimmed');
+      spotlight.classList.remove('on');
+      setTimeout(()=>{
+        stage.classList.remove('active');
+        msgDiv.innerHTML = '';
+        mtfActive = false;
+        vibeAnimDone();
+      }, 900);
+      return; /* stop rAF */
+    }
+
+    mtfRAF = requestAnimationFrame(mtfLoop);
   }
-  let houseGlowTimer=null;
-  houseRAF=requestAnimationFrame(houseLoop);
+
+  mtfRAF = requestAnimationFrame(mtfLoop);
 }
 
-function houseDisassemble(planks,ctx,canvas,stage,glowEl){
-  /* Reverse: send planks back off-screen */
-  cancelAnimationFrame(houseRAF);
-  const disStart=performance.now();
-  const DDUR=1200;
-  /* Store disassembly targets (random off-screen points) */
-  planks.forEach(p=>{
-    const edge=Math.floor(Math.random()*4);
-    if(edge===0){p.dx=Math.random()*canvas.width;p.dy=-120;}
-    else if(edge===1){p.dx=canvas.width+120;p.dy=Math.random()*canvas.height;}
-    else if(edge===2){p.dx=Math.random()*canvas.width;p.dy=canvas.height+120;}
-    else{p.dx=-120;p.dy=Math.random()*canvas.height;}
-    p.dangle=(Math.random()-0.5)*Math.PI*4;
-  });
-  function disLoop(ts){
-    const elapsed=ts-disStart,t=Math.min(elapsed/DDUR,1);
-    const ease=t*t;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    glowEl.style.opacity=String((1-ease)*0.9);
-    planks.forEach(p=>{
-      const cx=p.tx+(p.dx-p.tx)*ease;const cy=p.ty+(p.dy-p.ty)*ease;const rot=p.dangle*ease;
-      ctx.save();ctx.translate(cx,cy);ctx.rotate(rot);ctx.globalAlpha=1-ease*0.8;
-      ctx.beginPath();p.part.pts.forEach(([px,py],i)=>{const lx=px-p.tx,ly=py-p.ty;if(i===0)ctx.moveTo(lx,ly);else ctx.lineTo(lx,ly);});
-      ctx.closePath();ctx.fillStyle=p.part.color;ctx.fill();ctx.restore();
-    });
-    if(t<1){requestAnimationFrame(disLoop);}
-    else{ctx.clearRect(0,0,canvas.width,canvas.height);stage.classList.remove('active');houseActive=false;}
+/* No-op stub kept in case anything externally calls spawnRoseBlast */
+function spawnRoseBlast(){}
+
+
+
+
+/* ═════════════════════════════════════════════════════════════════════
+   SECTION B — PARENTS: PREMIUM "BUILD A HOME" ANIMATION
+   17 distinct house elements fly in one-by-one with physics easing,
+   snap into place, then living details animate (smoke, birds, petals,
+   flickering windows). On switch, each element scatters back out.
+═════════════════════════════════════════════════════════════════════ */
+let houseActive   = false;
+let houseRAF      = null;
+let _houseCtx     = null;   /* kept for disassemble access */
+let _houseCanvas  = null;
+let _houseStage   = null;
+let _houseGlowEl  = null;
+let _houseElements= null;   /* shared between assemble & disassemble */
+let _houseDisRAF  = null;
+let _houseGlowTimer = null;
+
+function triggerHouseAnimation(){
+  if(REDUCED || houseActive) return;
+  houseActive = true;
+
+  /* ── Grab DOM nodes ── */
+  const stage   = _houseStage  = document.getElementById('house-stage');
+  const canvas  = _houseCanvas = document.getElementById('house-canvas');
+  const glowEl  = _houseGlowEl = document.getElementById('house-glow');
+  const ctx     = _houseCtx    = canvas.getContext('2d');
+  stage.classList.add('active');
+
+  /* Fit canvas to viewport */
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const W  = canvas.width;
+  const H  = canvas.height;
+  /* House centre — lower-centre of screen so it's cinematic */
+  const HX = W * 0.5;
+  const HY = H * 0.62;
+  /* Responsive scale: full 1.0 on desktop, smaller on narrow */
+  const SC = Math.min(1, W / 520) * (IS_MOBILE ? 0.58 : 0.82);
+
+  /* ── Colour palette ── */
+  const C = {
+    ground    : '#5D4E37',
+    foundation: '#7A6248',
+    floor     : '#8B7355',
+    wallLight : '#C8A96E',
+    wallDark  : '#A0804A',
+    wallFront : '#B8946A',
+    roofMain  : '#8B3A0F',
+    roofDark  : '#6B2A08',
+    chimney   : '#5A3020',
+    door      : '#3B1F0A',
+    doorKnob  : '#D4A017',
+    winFrame  : '#5A3820',
+    winGlass  : '#FFF4C2',
+    winGlow   : 'rgba(255,220,100,0.85)',
+    fence     : '#B8936A',
+    path      : '#C4A882',
+    treeTrunk : '#5C3A1E',
+    treeLeaf  : '#2E7D32',
+    treeLeaf2 : '#388E3C',
+    flower1   : '#E91E63',
+    flower2   : '#FF9800',
+    mailbox   : '#C0392B',
+    mailPole  : '#7A5C3A',
+    smoke     : 'rgba(210,210,210,',
+    sky       : 'rgba(25,50,80,0)',   /* transparent — we overlay only */
+  };
+
+  /* ── Helper: polygon centroid ── */
+  function centroid(pts){ let sx=0,sy=0; pts.forEach(([x,y])=>{sx+=x;sy+=y;}); return [sx/pts.length, sy/pts.length]; }
+
+  /* ── Coordinate helper (relative to house centre) ── */
+  function P(x,y){ return [HX + x*SC, HY + y*SC]; }
+
+  /* ── Easing functions ── */
+  function easeOutBack(t,s=1.5){ const c1=s,c3=c1+1; return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2); }
+  function easeOutCubic(t){ return 1-Math.pow(1-t,3); }
+  function easeInOutQuad(t){ return t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; }
+
+  /* ── Random off-screen spawn on one of 4 edges ── */
+  function randomSpawn(edge){
+    if(edge===undefined) edge=Math.floor(Math.random()*4);
+    if(edge===0) return { sx:Math.random()*W,       sy:-140,      edge };
+    if(edge===1) return { sx:W+140,                 sy:Math.random()*H, edge };
+    if(edge===2) return { sx:Math.random()*W,       sy:H+140,     edge };
+                 return { sx:-140,                  sy:Math.random()*H, edge };
   }
-  requestAnimationFrame(disLoop);
+
+  /* ── Shadow helper ── */
+  function setShadow(ctx, blur=8, color='rgba(0,0,0,0.35)', ox=3, oy=4){
+    ctx.shadowBlur=blur; ctx.shadowColor=color; ctx.shadowOffsetX=ox; ctx.shadowOffsetY=oy;
+  }
+  function clearShadow(ctx){ ctx.shadowBlur=0; ctx.shadowColor='transparent'; ctx.shadowOffsetX=0; ctx.shadowOffsetY=0; }
+
+  /* ════════════════════════════════════════════════
+     ELEMENT DEFINITIONS — 17 parts, ordered by assembly
+     Each has: id, label, draw(ctx,alpha), pts for centroid,
+     delay(ms), flyInDur(ms), easeFn, spawnEdge
+  ════════════════════════════════════════════════ */
+  const ELEMENTS = [];
+  let delay = 0;
+  const GAP = IS_MOBILE ? 130 : 160; /* ms between each element arriving */
+  const FLY = IS_MOBILE ? 700 : 820; /* fly-in duration per element */
+
+  function addEl(id, label, pts, drawFn, extraDelay=0, edge=undefined){
+    const sp = randomSpawn(edge);
+    const [tx,ty] = centroid(pts);
+    delay += GAP + extraDelay;
+    ELEMENTS.push({
+      id, label,
+      tx, ty,           /* target position */
+      sx: sp.sx, sy: sp.sy,  /* spawn position */
+      edge: sp.edge,
+      startAngle: (Math.random()-0.5)*Math.PI*(IS_MOBILE?1.5:2),
+      delay,            /* ms after animStart before this element starts */
+      flyDur: FLY,
+      easeFn: easeOutBack,
+      progress: 0,
+      settled: false,
+      drawFn,           /* function(ctx, cx,cy,rot,alpha) */
+      pts,
+    });
+  }
+
+  /* ─────────────────────────────────────────────
+     1. FOUNDATION  (wide concrete slab)
+  ───────────────────────────────────────────── */
+  addEl('foundation','Foundation',
+    [P(-130,75),P(130,75),P(130,85),P(-130,85)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      setShadow(ctx,10,'rgba(0,0,0,0.4)',0,5);
+      const g=ctx.createLinearGradient(-130,0,130,0);
+      g.addColorStop(0,C.foundation); g.addColorStop(0.5,'#907060'); g.addColorStop(1,C.foundation);
+      ctx.fillStyle=g;
+      ctx.beginPath(); ctx.roundRect(-130,-5,260,14,3); ctx.fill();
+      clearShadow(ctx); ctx.restore();
+    }, 0, 2 /* from bottom */
+  );
+
+  /* ─────────────────────────────────────────────
+     2. FLOOR  (wooden floor slab)
+  ───────────────────────────────────────────── */
+  addEl('floor','Floor',
+    [P(-120,65),P(120,65),P(120,76),P(-120,76)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      setShadow(ctx,6,'rgba(0,0,0,0.3)',0,3);
+      const g=ctx.createLinearGradient(-120,0,120,0);
+      g.addColorStop(0,C.floor); g.addColorStop(0.3,'#9E865A'); g.addColorStop(0.7,C.floor); g.addColorStop(1,'#7A6240');
+      ctx.fillStyle=g; ctx.fillRect(-120,-6,240,12);
+      /* plank lines */
+      ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.lineWidth=0.8;
+      for(let x=-80;x<120;x+=40){ ctx.beginPath(); ctx.moveTo(x,-6); ctx.lineTo(x,6); ctx.stroke(); }
+      clearShadow(ctx); ctx.restore();
+    }, 0, 2
+  );
+
+  /* ─────────────────────────────────────────────
+     3. LEFT WALL
+  ───────────────────────────────────────────── */
+  addEl('wallL','Left Wall',
+    [P(-120,65),P(-120,-45),P(-5,-45),P(-5,65)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      setShadow(ctx,12,'rgba(0,0,0,0.35)',4,4);
+      const g=ctx.createLinearGradient(-58,0,0,0);
+      g.addColorStop(0,C.wallDark); g.addColorStop(1,C.wallFront);
+      ctx.fillStyle=g; ctx.fillRect(-58,-55,58,120);
+      /* horizontal siding lines */
+      ctx.strokeStyle='rgba(0,0,0,0.12)'; ctx.lineWidth=0.8;
+      for(let y=-45;y<65;y+=12){ ctx.beginPath(); ctx.moveTo(-58,y); ctx.lineTo(0,y); ctx.stroke(); }
+      clearShadow(ctx); ctx.restore();
+    }, 0, 3 /* from left */
+  );
+
+  /* ─────────────────────────────────────────────
+     4. RIGHT WALL
+  ───────────────────────────────────────────── */
+  addEl('wallR','Right Wall',
+    [P(5,65),P(5,-45),P(120,-45),P(120,65)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      setShadow(ctx,12,'rgba(0,0,0,0.35)',-4,4);
+      const g=ctx.createLinearGradient(0,0,58,0);
+      g.addColorStop(0,C.wallFront); g.addColorStop(1,C.wallDark);
+      ctx.fillStyle=g; ctx.fillRect(-58,-55,58,120);
+      ctx.strokeStyle='rgba(0,0,0,0.12)'; ctx.lineWidth=0.8;
+      for(let y=-45;y<65;y+=12){ ctx.beginPath(); ctx.moveTo(-58,y); ctx.lineTo(58,y); ctx.stroke(); }
+      clearShadow(ctx); ctx.restore();
+    }, 0, 1 /* from right */
+  );
+
+  /* ─────────────────────────────────────────────
+     5. FRONT WALL  (centre panel)
+  ───────────────────────────────────────────── */
+  addEl('wallFront','Front Wall',
+    [P(-5,65),P(-5,-45),P(5,-45),P(5,65)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      setShadow(ctx,8,'rgba(0,0,0,0.3)',0,3);
+      ctx.fillStyle=C.wallFront; ctx.fillRect(-5,-55,10,120);
+      clearShadow(ctx); ctx.restore();
+    }, 0, 0
+  );
+
+  /* ─────────────────────────────────────────────
+     6. BACK WALL  (visible above roof line – attic hint)
+  ───────────────────────────────────────────── */
+  addEl('wallBack','Back Wall',
+    [P(-115,-45),P(115,-45),P(115,-52),P(-115,-52)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      ctx.fillStyle='rgba(90,65,35,0.6)'; ctx.fillRect(-115,-4,230,8);
+      clearShadow(ctx); ctx.restore();
+    }, 0, 0
+  );
+
+  /* ─────────────────────────────────────────────
+     7. DOOR
+  ───────────────────────────────────────────── */
+  addEl('door','Door',
+    [P(-25,65),P(-25,5),P(25,5),P(25,65)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      setShadow(ctx,8,'rgba(0,0,0,0.4)',2,3);
+      /* Door body */
+      const g=ctx.createLinearGradient(-25,0,25,0);
+      g.addColorStop(0,C.door); g.addColorStop(0.5,'#5A3215'); g.addColorStop(1,C.door);
+      ctx.fillStyle=g; ctx.beginPath(); ctx.roundRect(-25,-30,50,60,4); ctx.fill();
+      /* Arch top */
+      ctx.fillStyle='#5A3215'; ctx.beginPath(); ctx.arc(0,-30,25,Math.PI,0); ctx.fill();
+      /* Door panel inset */
+      ctx.fillStyle='rgba(255,255,255,0.07)';
+      ctx.beginPath(); ctx.roundRect(-18,-25,36,25,3); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(-18,5,36,20,3); ctx.fill();
+      /* Knob */
+      clearShadow(ctx);
+      ctx.fillStyle=C.doorKnob;
+      ctx.beginPath(); ctx.arc(15,-5,3.5,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }, 0, 2
+  );
+
+  /* ─────────────────────────────────────────────
+     8. WINDOWS (left + right drawn together as one element)
+  ───────────────────────────────────────────── */
+  addEl('windows','Windows',
+    [P(-90,-8),P(-90,-38),P(-55,-38),P(-55,-8)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      function drawWin(ox,oy){
+        setShadow(ctx,6,'rgba(0,0,0,0.35)',2,2);
+        /* Frame */
+        ctx.fillStyle=C.winFrame;
+        ctx.beginPath(); ctx.roundRect(ox-21,oy-18,42,36,4); ctx.fill();
+        clearShadow(ctx);
+        /* Glass */
+        ctx.fillStyle=C.winGlass;
+        ctx.beginPath(); ctx.roundRect(ox-17,oy-14,34,28,3); ctx.fill();
+        /* Cross divider */
+        ctx.strokeStyle=C.winFrame; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(ox,oy-14); ctx.lineTo(ox,oy+14); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ox-17,oy); ctx.lineTo(ox+17,oy); ctx.stroke();
+        /* Inner glow */
+        const grd=ctx.createRadialGradient(ox,oy,0,ox,oy,18);
+        grd.addColorStop(0,'rgba(255,230,120,0.45)'); grd.addColorStop(1,'rgba(255,200,80,0)');
+        ctx.fillStyle=grd; ctx.fillRect(ox-17,oy-14,34,28);
+        /* Sill */
+        ctx.fillStyle='#7A5030';
+        ctx.fillRect(ox-22,oy+14,44,5);
+      }
+      /* Window coords relative to centroid P(-90,-23) */
+      drawWin(-72+90-3, 22);    /* left window offset from centroid */
+      drawWin(72-90+3,  22);    /* right window — mirror */
+      ctx.restore();
+    }, 0, 0
+  );
+
+  /* ─────────────────────────────────────────────
+     9. ROOF  (two triangular slopes + ridge)
+  ───────────────────────────────────────────── */
+  addEl('roof','Roof',
+    [P(-130,-43),P(0,-138),P(130,-43)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      setShadow(ctx,16,'rgba(0,0,0,0.5)',0,6);
+      /* Left slope */
+      const gL=ctx.createLinearGradient(-130,0,0,-95);
+      gL.addColorStop(0,C.roofMain); gL.addColorStop(1,C.roofDark);
+      ctx.fillStyle=gL;
+      ctx.beginPath(); ctx.moveTo(-130,0); ctx.lineTo(0,-95); ctx.lineTo(0,0); ctx.closePath(); ctx.fill();
+      /* Right slope */
+      const gR=ctx.createLinearGradient(0,-95,130,0);
+      gR.addColorStop(0,C.roofDark); gR.addColorStop(1,C.roofMain);
+      ctx.fillStyle=gR;
+      ctx.beginPath(); ctx.moveTo(0,-95); ctx.lineTo(130,0); ctx.lineTo(0,0); ctx.closePath(); ctx.fill();
+      /* Ridge beam */
+      clearShadow(ctx);
+      ctx.fillStyle='#5C2000'; ctx.fillRect(-4,-98,8,10);
+      /* Roof tiles (horizontal lines) */
+      ctx.strokeStyle='rgba(0,0,0,0.18)'; ctx.lineWidth=0.9;
+      for(let i=1;i<7;i++){
+        const tFrac=i/7;
+        const lx=-130*(1-tFrac), rx=130*(1-tFrac), ty=-95*tFrac;
+        ctx.beginPath(); ctx.moveTo(lx+5,ty+1); ctx.lineTo(rx-5,ty+1); ctx.stroke();
+      }
+      /* Eave overhang */
+      ctx.fillStyle='#7A3010';
+      ctx.beginPath(); ctx.moveTo(-135,2); ctx.lineTo(0,-97); ctx.lineTo(135,2); ctx.lineTo(130,8); ctx.lineTo(0,-90); ctx.lineTo(-130,8); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }, 0, 0
+  );
+
+  /* ─────────────────────────────────────────────
+     10. CHIMNEY
+  ───────────────────────────────────────────── */
+  addEl('chimney','Chimney',
+    [P(55,-138),P(55,-190),P(78,-190),P(78,-138)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      setShadow(ctx,8,'rgba(0,0,0,0.4)',3,3);
+      /* Brick body */
+      const g=ctx.createLinearGradient(-12,0,12,0);
+      g.addColorStop(0,'#6B3520'); g.addColorStop(0.5,'#8B4A30'); g.addColorStop(1,C.chimney);
+      ctx.fillStyle=g; ctx.fillRect(-12,-53,24,53);
+      /* Brick courses */
+      ctx.strokeStyle='rgba(0,0,0,0.2)'; ctx.lineWidth=0.7;
+      for(let y=-50;y<0;y+=8){ ctx.beginPath(); ctx.moveTo(-12,y); ctx.lineTo(12,y); ctx.stroke(); }
+      /* Chimney cap */
+      clearShadow(ctx);
+      setShadow(ctx,4,'rgba(0,0,0,0.3)',1,2);
+      ctx.fillStyle='#4A2010'; ctx.fillRect(-14,-54,28,5);
+      ctx.restore();
+    }, 50, 0
+  );
+
+  /* ─────────────────────────────────────────────
+     11. FENCE  (picket fence, two sections)
+  ───────────────────────────────────────────── */
+  addEl('fence','Fence',
+    [P(-180,65),P(-130,65),P(-130,35),P(-180,35)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      function drawFenceSection(ox){
+        /* rail */
+        ctx.fillStyle=C.fence;
+        ctx.fillRect(ox-55,24,110,5); ctx.fillRect(ox-55,14,110,4);
+        /* pickets */
+        for(let i=0;i<7;i++){
+          const px=ox-52+i*16;
+          ctx.beginPath();
+          ctx.moveTo(px,-15); ctx.lineTo(px+6,-15); ctx.lineTo(px+8,-7);
+          ctx.lineTo(px+8,28); ctx.lineTo(px,28); ctx.lineTo(px,-7);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+      drawFenceSection(-50);
+      drawFenceSection(50);
+      ctx.restore();
+    }, 100, 3
+  );
+
+  /* ─────────────────────────────────────────────
+     12. PATHWAY  (stone path to door)
+  ───────────────────────────────────────────── */
+  addEl('pathway','Pathway',
+    [P(-20,75),P(20,75),P(30,140),P(-30,140)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      setShadow(ctx,6,'rgba(0,0,0,0.25)',0,3);
+      const g=ctx.createLinearGradient(0,-35,0,65);
+      g.addColorStop(0,C.path); g.addColorStop(1,'#A08060');
+      ctx.fillStyle=g;
+      /* Trapezoid path */
+      ctx.beginPath(); ctx.moveTo(-20,-30); ctx.lineTo(20,-30); ctx.lineTo(30,65); ctx.lineTo(-30,65); ctx.closePath(); ctx.fill();
+      /* Stone slabs */
+      ctx.strokeStyle='rgba(0,0,0,0.12)'; ctx.lineWidth=1;
+      for(let y=-15;y<65;y+=18){
+        const halfW=22+y*0.12;
+        ctx.beginPath(); ctx.moveTo(-halfW,y); ctx.lineTo(halfW,y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(0,y+18); ctx.stroke();
+      }
+      clearShadow(ctx); ctx.restore();
+    }, 50, 2
+  );
+
+  /* ─────────────────────────────────────────────
+     13. TREE  (left side, lush)
+  ───────────────────────────────────────────── */
+  addEl('tree','Tree',
+    [P(-165,75),P(-165,-20),P(-135,-20),P(-135,75)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      setShadow(ctx,10,'rgba(0,0,0,0.3)',3,4);
+      /* Trunk */
+      const tg=ctx.createLinearGradient(-8,0,8,0);
+      tg.addColorStop(0,C.treeTrunk); tg.addColorStop(0.5,'#7A5030'); tg.addColorStop(1,C.treeTrunk);
+      ctx.fillStyle=tg; ctx.fillRect(-7,-5,14,80);
+      /* Canopy layers (3 overlapping circles) */
+      [[0,-65,38],[-10,-50,30],[10,-48,28]].forEach(([ox,oy,r])=>{
+        const lg=ctx.createRadialGradient(ox,oy,0,ox,oy,r);
+        lg.addColorStop(0,C.treeLeaf2); lg.addColorStop(0.7,C.treeLeaf); lg.addColorStop(1,'#1B5E20');
+        ctx.fillStyle=lg; ctx.beginPath(); ctx.arc(ox,oy,r,0,Math.PI*2); ctx.fill();
+      });
+      /* Highlight glint */
+      ctx.fillStyle='rgba(255,255,255,0.08)';
+      ctx.beginPath(); ctx.ellipse(-6,-68,10,6,Math.PI/4,0,Math.PI*2); ctx.fill();
+      clearShadow(ctx); ctx.restore();
+    }, 80, 3
+  );
+
+  /* ─────────────────────────────────────────────
+     14. FLOWER POTS  (both sides of door)
+  ───────────────────────────────────────────── */
+  addEl('flowerPots','Flower Pots',
+    [P(-50,65),P(-50,45),P(50,45),P(50,65)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+
+      /* ── Draw a detailed rose-in-pot at offset ox ── */
+      function drawRosePot(ox, roseHue){
+        /* ── POT BODY (terracotta trapezoid) ── */
+        setShadow(ctx,8,'rgba(0,0,0,0.35)',2,3);
+        const potGrd=ctx.createLinearGradient(ox-12,-2,ox+12,22);
+        potGrd.addColorStop(0,'#C1692A');
+        potGrd.addColorStop(0.5,'#D4742E');
+        potGrd.addColorStop(1,'#A0541E');
+        ctx.fillStyle=potGrd;
+        ctx.beginPath();
+        ctx.moveTo(ox-12,-2); ctx.lineTo(ox+12,-2);
+        ctx.lineTo(ox+8,22);  ctx.lineTo(ox-8,22);
+        ctx.closePath(); ctx.fill();
+
+        /* Pot rim */
+        clearShadow(ctx);
+        setShadow(ctx,4,'rgba(0,0,0,0.25)',0,2);
+        const rimGrd=ctx.createLinearGradient(ox-14,-5,ox+14,-2);
+        rimGrd.addColorStop(0,'#8B4513'); rimGrd.addColorStop(0.5,'#A05020'); rimGrd.addColorStop(1,'#8B4513');
+        ctx.fillStyle=rimGrd;
+        ctx.beginPath(); ctx.roundRect(ox-14,-6,28,6,2); ctx.fill();
+
+        /* Highlight stripe on pot */
+        clearShadow(ctx);
+        ctx.fillStyle='rgba(255,255,255,0.10)';
+        ctx.beginPath();
+        ctx.moveTo(ox-10,-2); ctx.lineTo(ox-6,-2); ctx.lineTo(ox-4,20); ctx.lineTo(ox-8,20);
+        ctx.closePath(); ctx.fill();
+
+        /* ── SOIL ── */
+        ctx.fillStyle='#2A1200';
+        ctx.beginPath(); ctx.ellipse(ox,0,10,3.5,0,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#3D1F00';
+        ctx.beginPath(); ctx.ellipse(ox,-0.5,8,2.5,0,0,Math.PI*2); ctx.fill();
+
+        /* ── STEM with natural S-curve ── */
+        const stemGrd=ctx.createLinearGradient(ox-2,0,ox+2,-44);
+        stemGrd.addColorStop(0,'#1B5E20');
+        stemGrd.addColorStop(0.5,'#2E7D32');
+        stemGrd.addColorStop(1,'#388E3C');
+        ctx.strokeStyle=stemGrd; ctx.lineWidth=2.2; ctx.lineCap='round';
+        setShadow(ctx,6,'rgba(30,100,20,.4)',1,1);
+        ctx.beginPath();
+        ctx.moveTo(ox, 0);
+        ctx.bezierCurveTo(ox-6,-14, ox+5,-28, ox,-42);
+        ctx.stroke();
+        clearShadow(ctx);
+
+        /* ── SMALL LEAVES on stem ── */
+        function drawLeaflet(lx,ly,angle,size){
+          ctx.save(); ctx.translate(lx,ly); ctx.rotate(angle);
+          const lg=ctx.createLinearGradient(0,0,size*1.2,-size*2);
+          lg.addColorStop(0,'#1B5E20'); lg.addColorStop(0.5,'#2E7D32'); lg.addColorStop(1,'#43A047');
+          ctx.fillStyle=lg;
+          ctx.beginPath();
+          ctx.moveTo(0,0);
+          ctx.bezierCurveTo(-size*0.6,-size*0.9,-size*0.3,-size*1.8,0,-size*2.2);
+          ctx.bezierCurveTo( size*0.6,-size*1.8, size*0.3,-size*0.8,0,0);
+          ctx.fill();
+          /* midrib */
+          ctx.strokeStyle='rgba(20,80,20,.45)'; ctx.lineWidth=0.8;
+          ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-size*2); ctx.stroke();
+          ctx.restore();
+        }
+        drawLeaflet(ox-4,-14, -0.85, 5);   /* lower-left leaf */
+        drawLeaflet(ox+4,-22,  0.72, 4.5); /* upper-right leaf */
+        drawLeaflet(ox-3,-30, -0.55, 4);   /* top-left leaf */
+
+        /* ── ROSE BLOOM at stem tip ── */
+        const rx=ox, ry=-44;
+
+        /* Golden glow behind rose */
+        const glowGrd=ctx.createRadialGradient(rx,ry,0,rx,ry,18);
+        glowGrd.addColorStop(0,`hsla(${roseHue+20},100%,75%,0.22)`);
+        glowGrd.addColorStop(1,'rgba(255,200,100,0)');
+        ctx.fillStyle=glowGrd;
+        ctx.beginPath(); ctx.arc(rx,ry,18,0,Math.PI*2); ctx.fill();
+
+        /* Sepal (green cup) */
+        ctx.fillStyle='#2E7D32';
+        ctx.beginPath();
+        [-1.1,-0.4,0.3,1.0,1.7].forEach((ang,i)=>{
+          const sx=rx+Math.cos(ang)*4, sy=ry+8+Math.sin(ang)*2;
+          ctx.save(); ctx.translate(sx,sy); ctx.rotate(ang);
+          ctx.ellipse(0,0,1.5,5,0,0,Math.PI*2); ctx.fill();
+          ctx.restore();
+        });
+
+        /* ── Rose petals: 3 layers, opening outward ── */
+        function drawPetal(px,py,angle,w,h,hue,lit){
+          ctx.save(); ctx.translate(px,py); ctx.rotate(angle);
+          const pg=ctx.createLinearGradient(0,-h,0,h*0.3);
+          pg.addColorStop(0,`hsl(${hue},88%,${lit+12}%)`);
+          pg.addColorStop(0.55,`hsl(${hue},85%,${lit}%)`);
+          pg.addColorStop(1,`hsl(${hue},80%,${lit-10}%)`);
+          ctx.fillStyle=pg;
+          setShadow(ctx,5,`hsla(${hue},80%,30%,.35)`,0,2);
+          ctx.beginPath();
+          ctx.moveTo(0, h*0.25);
+          ctx.bezierCurveTo( w*0.9, h*0.1,  w*0.65,-h*0.6, 0,-h*0.88);
+          ctx.bezierCurveTo(-w*0.65,-h*0.6,-w*0.9,  h*0.1, 0, h*0.25);
+          ctx.closePath(); ctx.fill();
+          /* highlight sheen */
+          clearShadow(ctx);
+          ctx.fillStyle='rgba(255,255,255,.16)';
+          ctx.beginPath(); ctx.ellipse(-w*0.22,-h*0.38,w*0.28,h*0.2,-0.35,0,Math.PI*2); ctx.fill();
+          ctx.restore();
+        }
+
+        /* Outer ring – 5 petals */
+        for(let i=0;i<5;i++){
+          const ang=(i/5)*Math.PI*2;
+          drawPetal(rx+Math.cos(ang)*5, ry+Math.sin(ang)*5, ang+Math.PI/2, 5.5,8, roseHue, 45);
+        }
+        /* Mid ring – 5 petals, offset 36° */
+        for(let i=0;i<5;i++){
+          const ang=(i/5)*Math.PI*2 + 0.62;
+          drawPetal(rx+Math.cos(ang)*3, ry+Math.sin(ang)*3, ang+Math.PI/2, 4.5,7, roseHue+5, 52);
+        }
+        /* Inner ring – 4 petals */
+        for(let i=0;i<4;i++){
+          const ang=(i/4)*Math.PI*2 + 0.38;
+          drawPetal(rx+Math.cos(ang)*1.5, ry+Math.sin(ang)*1.5, ang+Math.PI/2, 3.5,5.5, roseHue+8, 60);
+        }
+        /* Centre */
+        clearShadow(ctx);
+        const cg=ctx.createRadialGradient(rx,ry,0,rx,ry,4);
+        cg.addColorStop(0,`hsl(${roseHue+15},95%,78%)`);
+        cg.addColorStop(1,`hsl(${roseHue},90%,52%)`);
+        ctx.fillStyle=cg;
+        setShadow(ctx,4,`hsla(${roseHue},90%,30%,.5)`,0,1);
+        ctx.beginPath(); ctx.arc(rx,ry,3.5,0,Math.PI*2); ctx.fill();
+        clearShadow(ctx);
+
+        /* Stamen dots */
+        ctx.fillStyle=`hsl(${roseHue+25},100%,85%)`;
+        for(let k=0;k<6;k++){
+          const sa=(k/6)*Math.PI*2;
+          ctx.beginPath(); ctx.arc(rx+Math.cos(sa)*2.5,ry+Math.sin(sa)*2.5,0.9,0,Math.PI*2); ctx.fill();
+        }
+      }
+
+      /* Draw left pot: deep red rose (hue 0) */
+      drawRosePot(-42, 0);
+      /* Draw right pot: pink rose (hue 340) */
+      drawRosePot( 42, 340);
+
+      ctx.restore();
+    }, 60, 2
+  );
+
+  /* ─────────────────────────────────────────────
+     15. MAILBOX
+  ───────────────────────────────────────────── */
+  addEl('mailbox','Mailbox',
+    [P(148,65),P(148,30),P(170,30),P(170,65)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      setShadow(ctx,6,'rgba(0,0,0,0.3)',2,2);
+      /* Pole */
+      ctx.fillStyle=C.mailPole; ctx.fillRect(-2,-20,4,55);
+      /* Box body */
+      ctx.fillStyle=C.mailbox;
+      ctx.beginPath(); ctx.roundRect(-14,-50,28,30,3); ctx.fill();
+      /* Arch top */
+      ctx.beginPath(); ctx.arc(-14+14,-50+14,14,Math.PI,0); ctx.fill();
+      /* Slot */
+      ctx.fillStyle='rgba(0,0,0,0.4)'; ctx.fillRect(-10,-38,20,3);
+      /* Flag */
+      ctx.fillStyle='#E53935'; ctx.fillRect(15,-48,3,16); ctx.fillRect(15,-48,12,10);
+      clearShadow(ctx); ctx.restore();
+    }, 0, 1
+  );
+
+  /* ─────────────────────────────────────────────
+     16. WARM WINDOW LIGHTS (drawn as overlay, not flying in
+         — added to living-scene phase only)
+     We register a placeholder element for timing purposes.
+  ───────────────────────────────────────────── */
+  /* (Window lights are handled inside the living-scene loop) */
+
+  /* ─────────────────────────────────────────────
+     17. The 16th timed element = GROUND GRASS STRIP
+  ───────────────────────────────────────────── */
+  addEl('grass','Ground',
+    [P(-200,76),P(200,76),P(200,88),P(-200,88)],
+    (ctx,cx,cy,rot,a)=>{
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); ctx.globalAlpha=a;
+      const g=ctx.createLinearGradient(-200,0,200,0);
+      g.addColorStop(0,'#2E7D32'); g.addColorStop(0.5,'#388E3C'); g.addColorStop(1,'#2E7D32');
+      ctx.fillStyle=g; ctx.fillRect(-200,-4,400,14);
+      /* Grass tufts */
+      ctx.strokeStyle='#1B5E20'; ctx.lineWidth=1;
+      for(let gx=-190;gx<200;gx+=8){
+        ctx.beginPath(); ctx.moveTo(gx,0); ctx.quadraticCurveTo(gx-3,-6,gx-1,-10); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(gx+4,0); ctx.quadraticCurveTo(gx+7,-5,gx+6,-9); ctx.stroke();
+      }
+      ctx.restore();
+    }, 0, 2
+  );
+
+  /* Save reference for disassemble */
+  _houseElements = ELEMENTS;
+
+  /* ════════════════════════════════════════════
+     LIVING-SCENE STATE  (smoke, birds, petals, flicker)
+  ════════════════════════════════════════════ */
+  const smokeParticles = [];
+  const birds = [];
+  const fallingPetals = [];
+  let windowFlicker = 1.0;
+  let flickerDir    = -1;
+  let flickerTimer  = 0;
+  let livingSceneActive = false;
+  let glowAlpha  = 0;
+  let sceneTimer = null;
+  let houseMessageShown = false;
+  const houseMsgDiv = document.getElementById('house-message');
+  if(houseMsgDiv) houseMsgDiv.innerHTML = '';
+
+  /* ── Warm note card, shown once the house lights up ── */
+  function showHouseMessage(){
+    if(houseMessageShown || !houseMsgDiv) return;
+    houseMessageShown = true;
+    const card = document.createElement('div');
+    card.className = 'vibe-msg-card';
+    card.style.setProperty('--vc','#ffb25f');
+    card.style.setProperty('--vc2','#fff1c2');
+    card.innerHTML = `
+      <span class="vibe-msg-icon" role="img" aria-label="home">🏡</span>
+      <div class="vibe-msg-line" id="houseL1">No matter how far I go,</div>
+      <div class="vibe-msg-main vibe-msg-line" id="houseL2">home is always with you.</div>
+      <div class="vibe-msg-line" id="houseL3">Thank you for the warmth,</div>
+      <div class="vibe-msg-line" id="houseL4">the comfort, and the love. 🕯️</div>
+      <div class="vibe-msg-sign" id="houseSign">— With love, always your child</div>
+    `;
+    houseMsgDiv.appendChild(card);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      card.classList.add('show');
+      ['houseL1','houseL2','houseL3','houseL4'].forEach((id,i)=>{
+        setTimeout(()=>{
+          const el=document.getElementById(id);
+          if(el) el.classList.add('typed');
+        }, 350 + i*620);
+      });
+      setTimeout(()=>{
+        const s=document.getElementById('houseSign');
+        if(s) s.classList.add('show');
+      }, 3400);
+    }));
+  }
+  function hideHouseMessage(){
+    if(!houseMsgDiv) return;
+    const card = houseMsgDiv.querySelector('.vibe-msg-card');
+    if(card) card.classList.remove('show');
+    setTimeout(()=>{ if(houseMsgDiv) houseMsgDiv.innerHTML=''; }, 700);
+  }
+
+  function spawnSmoke(){
+    smokeParticles.push({
+      x: HX + 66*SC,
+      y: HY - 195*SC,
+      vx: (Math.random()-0.5)*0.4,
+      vy: -(0.5+Math.random()*0.6),
+      r:  6+Math.random()*6,
+      age: 0,
+      maxAge: 90+Math.random()*60,
+      alpha: 0,
+    });
+  }
+
+  function spawnBird(){
+    const fromLeft = Math.random()<0.5;
+    birds.push({
+      x: fromLeft ? -60 : W+60,
+      y: HY - (160+Math.random()*80)*SC,
+      vx: fromLeft ? (1.2+Math.random()*0.8) : -(1.2+Math.random()*0.8),
+      wing: 0,
+      wingDir: 1,
+      age: 0,
+      maxAge: 320,
+    });
+  }
+
+  function spawnPetal(){
+    fallingPetals.push({
+      x: HX + (Math.random()-0.5)*280*SC,
+      y: HY - 140*SC,
+      vx: (Math.random()-0.5)*0.8,
+      vy: 0.4+Math.random()*0.6,
+      rot: Math.random()*Math.PI*2,
+      rotV: (Math.random()-0.5)*0.06,
+      r: 3+Math.random()*4,
+      age: 0,
+      maxAge: 200+Math.random()*120,
+      color: ['#FFB3C6','#FFCCDD','#FFE4EC','#FF8FAB'][Math.floor(Math.random()*4)],
+    });
+  }
+
+  /* ════════════════════════════════════════════
+     DRAW HELPERS for living scene
+  ════════════════════════════════════════════ */
+  function drawLivingScene(ts){
+    /* Warm golden glow behind house */
+    const hg = ctx.createRadialGradient(HX,HY-20,10,HX,HY,220*SC);
+    hg.addColorStop(0,`rgba(255,200,80,${glowAlpha*0.18})`);
+    hg.addColorStop(0.5,`rgba(255,150,50,${glowAlpha*0.10})`);
+    hg.addColorStop(1,'rgba(255,100,30,0)');
+    ctx.fillStyle=hg; ctx.fillRect(0,0,W,H);
+
+    /* Window flicker */
+    flickerTimer++;
+    if(flickerTimer>30){
+      flickerTimer=0; flickerDir=-flickerDir;
+      windowFlicker=Math.max(0.6,Math.min(1,windowFlicker+flickerDir*(0.05+Math.random()*0.1)));
+    }
+    [[HX-72*SC, HY-23*SC],[HX+72*SC, HY-23*SC]].forEach(([wx,wy])=>{
+      const wg=ctx.createRadialGradient(wx,wy,2,wx,wy,38*SC);
+      wg.addColorStop(0,`rgba(255,235,120,${glowAlpha*windowFlicker*0.75})`);
+      wg.addColorStop(1,'rgba(255,180,60,0)');
+      ctx.fillStyle=wg; ctx.beginPath(); ctx.arc(wx,wy,38*SC,0,Math.PI*2); ctx.fill();
+    });
+
+    /* Smoke from chimney */
+    if(Math.random()<0.12) spawnSmoke();
+    for(let i=smokeParticles.length-1;i>=0;i--){
+      const s=smokeParticles[i];
+      s.x+=s.vx; s.y+=s.vy; s.r+=0.06; s.age++;
+      s.alpha = s.age<20?(s.age/20)*0.28:Math.max(0,0.28*(1-(s.age-20)/(s.maxAge-20)));
+      if(s.age>=s.maxAge){ smokeParticles.splice(i,1); continue; }
+      const sg=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r);
+      sg.addColorStop(0,`rgba(200,200,200,${s.alpha})`);
+      sg.addColorStop(1,'rgba(200,200,200,0)');
+      ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+    }
+
+    /* Birds */
+    if(Math.random()<0.003 && birds.length<(IS_MOBILE?1:3)) spawnBird();
+    for(let i=birds.length-1;i>=0;i--){
+      const b=birds[i];
+      b.x+=b.vx; b.age++;
+      b.wing+=0.18*b.wingDir;
+      if(Math.abs(b.wing)>0.7) b.wingDir*=-1;
+      if(b.age>=b.maxAge||b.x<-80||b.x>W+80){ birds.splice(i,1); continue; }
+      const ba=Math.min(b.age/20,1)*Math.max(0,1-(b.age-b.maxAge+30)/30);
+      ctx.save(); ctx.globalAlpha=ba*0.85; ctx.strokeStyle='#333'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(b.x-8,b.y); ctx.quadraticCurveTo(b.x-4,b.y-6*b.wing,b.x,b.y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.quadraticCurveTo(b.x+4,b.y-6*b.wing,b.x+8,b.y); ctx.stroke();
+      ctx.restore();
+    }
+
+    /* Falling petals */
+    if(Math.random()<0.08 && fallingPetals.length<(IS_MOBILE?6:18)) spawnPetal();
+    for(let i=fallingPetals.length-1;i>=0;i--){
+      const fp=fallingPetals[i];
+      fp.x+=fp.vx+Math.sin(fp.age*0.04)*0.4; fp.y+=fp.vy; fp.rot+=fp.rotV; fp.age++;
+      const fa=fp.age<20?(fp.age/20):Math.max(0,1-(fp.age-20)/(fp.maxAge-20));
+      if(fp.age>=fp.maxAge){ fallingPetals.splice(i,1); continue; }
+      ctx.save(); ctx.translate(fp.x,fp.y); ctx.rotate(fp.rot); ctx.globalAlpha=fa*0.8;
+      ctx.fillStyle=fp.color;
+      ctx.beginPath(); ctx.ellipse(0,0,fp.r,fp.r*1.6,0,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  /* ════════════════════════════════════════════
+     MAIN ANIMATION LOOP
+  ════════════════════════════════════════════ */
+  const animStart = performance.now();
+
+  /* Total time until all elements settle */
+  const lastEl  = ELEMENTS[ELEMENTS.length-1];
+  const SETTLE_AT= lastEl.delay + lastEl.flyDur + 200;
+
+  function houseLoop(ts){
+    ctx.clearRect(0,0,W,H);
+
+    /* ── 1. Draw living-scene background effects (behind house) ── */
+    if(livingSceneActive){
+      drawLivingScene(ts);
+    }
+
+    /* ── 2. Fly-in all elements ── */
+    let allSettled = true;
+    ELEMENTS.forEach(el=>{
+      const elapsed = ts - animStart - el.delay;
+      if(elapsed < 0){ allSettled=false; return; }
+      const t = Math.min(elapsed / el.flyDur, 1);
+      if(t < 1) allSettled=false;
+      el.progress = t;
+
+      /* Bounce easing — back.out feel */
+      const ease = el.easeFn(t, 1.4);
+      const cx   = el.sx + (el.tx - el.sx)*ease;
+      const cy   = el.sy + (el.ty - el.sy)*ease;
+      const rot  = el.startAngle * (1 - ease);
+
+      /* Motion blur: stretch slightly in direction of travel */
+      const spd  = Math.hypot(el.tx-el.sx, el.ty-el.sy);
+      const blur = t<0.9 ? Math.max(0,(1-t)*spd*0.003) : 0;
+      if(blur>0.5){
+        ctx.save(); ctx.filter=`blur(${Math.min(blur,3)}px)`;
+        el.drawFn(ctx,cx,cy,rot, Math.min(t*3,1));
+        ctx.filter='none'; ctx.restore();
+      } else {
+        el.drawFn(ctx,cx,cy,rot, Math.min(t*3,1));
+      }
+
+      /* Drop-shadow grows as element approaches (perspective cue) */
+    });
+
+    /* ── 3. Once all settled, activate living scene ── */
+    if(allSettled && !livingSceneActive){
+      livingSceneActive = true;
+    }
+    if(livingSceneActive){
+      glowAlpha = Math.min(glowAlpha+0.012,1);
+      glowEl.style.opacity = String(glowAlpha*0.85);
+      /* Show the warm note once the house is mostly glowing */
+      if(glowAlpha>=0.7 && !houseMessageShown){
+        showHouseMessage();
+      }
+      /* Schedule auto-disassemble after a longer glory hold */
+      if(glowAlpha>=1 && !sceneTimer){
+        sceneTimer=setTimeout(()=>{
+          hideHouseMessage();
+          setTimeout(()=>houseDisassemble(), 600);
+        }, 8500);
+      }
+    }
+
+    houseRAF = requestAnimationFrame(houseLoop);
+  }
+  houseRAF = requestAnimationFrame(houseLoop);
+}
+
+/* ══════════════════════════════════════════════
+   HOUSE DISASSEMBLE — each piece scatters back
+   to its original spawn edge with rotation
+══════════════════════════════════════════════ */
+function houseDisassemble(){
+  if(!_houseCtx || !_houseElements) return;
+  cancelAnimationFrame(houseRAF);
+  const ctx    = _houseCtx;
+  const canvas = _houseCanvas;
+  const stage  = _houseStage;
+  const glowEl = _houseGlowEl;
+  const W=canvas.width, H=canvas.height;
+
+  /* Assign each element an exit target back off-screen via original edge */
+  _houseElements.forEach(el=>{
+    const edge=el.edge;
+    if(edge===0){ el.dx=Math.random()*W;     el.dy=-160; }
+    else if(edge===1){ el.dx=W+160;          el.dy=Math.random()*H; }
+    else if(edge===2){ el.dx=Math.random()*W;el.dy=H+160; }
+    else{             el.dx=-160;            el.dy=Math.random()*H; }
+    el.exitAngle=(Math.random()-0.5)*Math.PI*3;
+  });
+
+  const disStart=performance.now();
+  const DDUR=1400; /* ms to fully scatter */
+
+  function disLoop(ts){
+    const elapsed=ts-disStart;
+    const tGlobal=Math.min(elapsed/DDUR,1);
+    ctx.clearRect(0,0,W,H);
+
+    /* Fade CSS glow */
+    glowEl.style.opacity=String(Math.max(0,1-tGlobal)*0.85);
+
+    /* Scatter elements one by one (reverse order, staggered) */
+    const N=_houseElements.length;
+    _houseElements.slice().reverse().forEach((el,ri)=>{
+      const elDelay=ri*60;
+      const et=Math.max(0,elapsed-elDelay);
+      const t=Math.min(et/DDUR,1);
+      const ease=t*t; /* ease-in: slow start, fast exit */
+      const cx=el.tx+(el.dx-el.tx)*ease;
+      const cy=el.ty+(el.dy-el.ty)*ease;
+      const rot=el.exitAngle*ease;
+      el.drawFn(ctx,cx,cy,rot, Math.max(0,1-ease*1.4));
+    });
+
+    if(tGlobal<1){
+      _houseDisRAF=requestAnimationFrame(disLoop);
+    } else {
+      ctx.clearRect(0,0,W,H);
+      stage.classList.remove('active');
+      glowEl.style.opacity='0';
+      houseActive=false;
+      _houseElements=null;
+      vibeAnimDone();
+    }
+  }
+  _houseDisRAF=requestAnimationFrame(disLoop);
 }
 
 
@@ -1215,6 +2962,48 @@ function triggerConstellationAnimation(){
 
   const CX=canvas.width/2,CY=canvas.height/2;
   const SC=IS_MOBILE?0.7:1.0;
+
+  /* ── Friendship note card ── */
+  let friendsMessageShown = false;
+  const friendsMsgDiv = document.getElementById('friends-message');
+  if(friendsMsgDiv) friendsMsgDiv.innerHTML = '';
+
+  function showFriendsMessage(){
+    if(friendsMessageShown || !friendsMsgDiv) return;
+    friendsMessageShown = true;
+    const card = document.createElement('div');
+    card.className = 'vibe-msg-card';
+    card.style.setProperty('--vc','#38d6ff');
+    card.style.setProperty('--vc2','#ffe66d');
+    card.innerHTML = `
+      <span class="vibe-msg-icon" role="img" aria-label="stars">🌟</span>
+      <div class="vibe-msg-line" id="friendsL1">Good friends are the stars</div>
+      <div class="vibe-msg-main vibe-msg-line" id="friendsL2">that never really fade.</div>
+      <div class="vibe-msg-line" id="friendsL3">Here's to more laughs,</div>
+      <div class="vibe-msg-line" id="friendsL4">more memories, more us. ✨</div>
+      <div class="vibe-msg-sign" id="friendsSign">— Your forever crew</div>
+    `;
+    friendsMsgDiv.appendChild(card);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      card.classList.add('show');
+      ['friendsL1','friendsL2','friendsL3','friendsL4'].forEach((id,i)=>{
+        setTimeout(()=>{
+          const el=document.getElementById(id);
+          if(el) el.classList.add('typed');
+        }, 350 + i*620);
+      });
+      setTimeout(()=>{
+        const s=document.getElementById('friendsSign');
+        if(s) s.classList.add('show');
+      }, 3400);
+    }));
+  }
+  function hideFriendsMessage(){
+    if(!friendsMsgDiv) return;
+    const card = friendsMsgDiv.querySelector('.vibe-msg-card');
+    if(card) card.classList.remove('show');
+    setTimeout(()=>{ if(friendsMsgDiv) friendsMsgDiv.innerHTML=''; }, 700);
+  }
 
   /* ── Constellation points (relative offsets, Big Dipper-ish) ── */
   const constellPts=[
@@ -1252,7 +3041,7 @@ function triggerConstellationAnimation(){
   const lines=[[0,1],[1,2],[2,3],[0,4],[1,5],[2,6],[3,6],[6,7],[7,8],[8,9]].filter(([a,b])=>a<STAR_COUNT&&b<STAR_COUNT);
 
   const animStart=performance.now();
-  const GATHER_DUR=1800,PULSE_DUR=2000,DRIFT_DUR=1800;
+  const GATHER_DUR=1200,PULSE_DUR=8000,DRIFT_DUR=1200;
   let phase='gather';
 
   /* Magic dust emitter */
@@ -1285,7 +3074,10 @@ function triggerConstellationAnimation(){
         s.x=s.sx+(s.tx-s.sx)*ease;s.y=s.sy+(s.ty-s.sy)*ease;
         if(t>=0.3&&Math.random()<0.06)emitDust(s.x,s.y,s.color);
       });
-      if(elapsed>GATHER_DUR+stars[stars.length-1].delay){phase='pulse';}
+      if(elapsed>GATHER_DUR+stars[stars.length-1].delay){
+        phase='pulse';
+        showFriendsMessage();
+      }
     }
 
     /* Draw constellation lines */
@@ -1300,7 +3092,11 @@ function triggerConstellationAnimation(){
     /* Pulse phase */
     if(phase==='pulse'){
       const pt=(elapsed-GATHER_DUR-stars[stars.length-1].delay)/PULSE_DUR;
-      if(pt>=1){phase='drift';stars.forEach(s=>{s.driftStart=ts;});}
+      if(pt>=1){
+        phase='drift';
+        stars.forEach(s=>{s.driftStart=ts;});
+        hideFriendsMessage();
+      }
       stars.forEach(s=>{
         s.glowR=s.r*3+Math.sin(ts/200+s.r)*s.r*2;
         if(Math.random()<0.03)emitDust(s.x,s.y,s.color);
@@ -1314,7 +3110,7 @@ function triggerConstellationAnimation(){
         s.x=s.tx+s.dx*ease;s.y=s.ty+s.dy*ease;
       });
       if(stars.every(s=>s.driftStart&&(ts-s.driftStart)>=DRIFT_DUR)){
-        stage.classList.remove('active');constellationActive=false;return;
+        stage.classList.remove('active');constellationActive=false;vibeAnimDone();return;
       }
     }
 
@@ -1322,9 +3118,10 @@ function triggerConstellationAnimation(){
     for(let i=dust.length-1;i>=0;i--){
       const d=dust[i];d.x+=d.vx;d.y+=d.vy;d.life++;
       const da=1-d.life/d.maxLife;
-      ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fillStyle=d.color.replace(')',`,${da*0.7})`).replace('rgb','rgba').replace('#',`rgba(${parseInt(d.color.slice(1,3),16)},${parseInt(d.color.slice(3,5),16)},${parseInt(d.color.slice(5,7),16)},`)+da*0.7+')';
-      /* simplified dust draw */
-      ctx.globalAlpha=da*0.7;ctx.fillStyle=d.color;ctx.fill();ctx.globalAlpha=1;
+      ctx.globalAlpha=da*0.7;
+      ctx.fillStyle=d.color;
+      ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fill();
+      ctx.globalAlpha=1;
       if(d.life>=d.maxLife)dust.splice(i,1);
     }
 
@@ -1357,156 +3154,476 @@ function triggerConstellationAnimation(){
 function hexToRgba(hex,a){const n=parseInt(hex.slice(1),16);return`rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;}
 
 
-/* ─────────────────────────────────────────────────────────────────
-   SECTION D — SIBLINGS: PUZZLE HEART ASSEMBLY
-   Colorful puzzle pieces fly in from all directions, snap
-   together to form a glowing heart, then gently fade out.
-───────────────────────────────────────────────────────────────── */
-let puzzleActive=false;
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION D — SIBLINGS: BOLLYWOOD FILMY CINEMATIC EDITION 🎬
+   ───────────────────────────────────────────────────────────────────────
+   Act 0  (0 – 0.8s)   Clapperboard SNAP → letterbox bars close → film grain
+   Act 1  (0.8 – 2s)   Dramatic dark-room → spotlight sweeps left-to-right
+   Act 2  (2 – 5s)     Colourful puzzle pieces fly in with comic-book trails
+                        Each piece lands with CLANK shockwave + emoji burst
+   Act 3  (5 – 6.5s)   Heart assembled → rainbow outline pulses 3×
+                        Bollywood shimmer confetti rains down
+   Act 4  (6.5 – 9s)   Title card rises: "SIBLINGS" in golden shimmer
+                        Typewriter quote reveals + signature fades in
+   Act 5  (9 – 11s)    Zoomed "camera pull-back" effect on the heart
+                        Firefly twinkles + gold star shower
+   Act 6  (11 – 12.5s) Iris-wipe close → fade to black → exit
+   ─────────────────────────────────────────────────────────────────────── */
+let puzzleActive = false;
 
 function triggerPuzzleAnimation(){
-  if(REDUCED||puzzleActive)return;
-  puzzleActive=true;
-  const stage=document.getElementById('puzzle-stage');
-  const canvas=document.getElementById('puzzle-canvas');
-  const glowEl=document.getElementById('puzzle-glow');
-  const ctx=canvas.getContext('2d');
+  if(REDUCED || puzzleActive) return;
+  puzzleActive = true;
+
+  /* ── DOM refs ── */
+  const stage    = document.getElementById('puzzle-stage');
+  const canvas   = document.getElementById('puzzle-canvas');
+  const glowEl   = document.getElementById('puzzle-glow');
+  const clapper  = document.getElementById('sib-clapper');
+  const caption  = document.getElementById('sib-caption');
+  const titleCard= document.getElementById('sibTitleCard');
+  const quoteEl  = document.getElementById('sibQuote');
+  const signEl   = document.getElementById('sibSign');
+  const ctx      = canvas.getContext('2d');
+
   stage.classList.add('active');
-  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
 
-  const CX=canvas.width/2,CY=canvas.height/2;
-  const SC=IS_MOBILE?0.6:0.85;
+  const W  = canvas.width,  H  = canvas.height;
+  const CX = W * 0.5,       CY = H * 0.5;
+  const SC = IS_MOBILE ? 0.58 : 0.82;
+  const PB = IS_MOBILE ? 0.5 : 1.0; /* particle budget */
 
-  /* ── Heart outline via parametric eq, divided into N pieces ── */
-  /* Heart parametric: x=16sin³t, y=-(13cos t-5cos2t-2cos3t-cos4t) */
+  /* ── Easing ── */
+  const eOut3  = t => 1 - Math.pow(1-t, 3);
+  const eOut5  = t => 1 - Math.pow(1-t, 5);
+  const eOutBk = (t,s=1.5) => { const c3=s+1; return 1+c3*Math.pow(t-1,3)+s*Math.pow(t-1,2); };
+  const eInOut = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+
+  /* ══ Timeline ms ══ */
+  const T = {
+    clapper    : 0,
+    letterbox  : 100,
+    spotlight  : 400,
+    piecesStart: 800,      /* pieces start flying immediately */
+    assembled  : 2800,
+    rainbow    : 2800,
+    confetti   : 3000,
+    titleCard  : 3200,
+    typewriter : 3500,
+    cameraPull : 6200,     /* was 4500 — title/quote now hold ~3.7s before camera pulls back */
+    starShower : 6200,     /* was 4500 */
+    irisWipe   : 9200,     /* was 5200 — extra ~3s of readable hold */
+    done       : 10400,    /* was 6200 — total: 10.4 seconds */
+  };
+
+  /* ══ Heart parametric ══ */
   function heartPt(t){
-    const x=16*Math.pow(Math.sin(t),3)*11*SC;
-    const y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))*11*SC;
-    return[CX+x,CY+y+30*SC];
+    const x = 16 * Math.pow(Math.sin(t),3) * 11 * SC;
+    const y = -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t)) * 11 * SC;
+    return [CX+x, CY+y+20*SC];
   }
 
-  const PIECE_COUNT=IS_MOBILE?14:22;
-  const COLORS=['#ff4f8b','#ff85b3','#ffb3d4','#9cff8f','#93c5fd','#ffd1df','#ff6fa0','#a5f3a0','#7dd3fc','#fbb8d0','#c4b5fd','#6ee7b7','#fdba74','#f9a8d4'];
+  /* ══ Build puzzle pieces ══ */
+  const PIECE_N  = IS_MOBILE ? 14 : 22;
+  const COLORS   = ['#ff4f8b','#ff85b3','#9cff8f','#93c5fd','#ffd700','#ff6fa0',
+                    '#a5f3a0','#7dd3fc','#fbb8d0','#c4b5fd','#6ee7b7','#fdba74',
+                    '#f9a8d4','#fde68a','#86efac','#bfdbfe'];
+  /* Corresponding emoji bursts per piece */
+  const EMOJIS   = ['🎉','🎊','✨','💫','⭐','🌟','💥','🎆','🎇','🌈','🎁','🎈','🎀','🪅','🏆','❤️'];
 
-  /* Build pieces as sectors of the heart */
-  const pieces=[];
-  for(let i=0;i<PIECE_COUNT;i++){
-    const t0=(i/PIECE_COUNT)*Math.PI*2;
-    const t1=((i+1)/PIECE_COUNT)*Math.PI*2;
-    const STEPS=12;
-    const pts=[];
-    /* From centre to arc */
-    for(let s=0;s<=STEPS;s++){const t=t0+(t1-t0)*(s/STEPS);pts.push(heartPt(t));}
-    pts.push([CX,CY+30*SC]); /* back to centre */
+  const pieces = [];
+  for(let i=0;i<PIECE_N;i++){
+    const t0 = (i/PIECE_N)*Math.PI*2, t1 = ((i+1)/PIECE_N)*Math.PI*2;
+    const pts = [];
+    for(let s=0;s<=14;s++){ const t=t0+(t1-t0)*(s/14); pts.push(heartPt(t)); }
+    pts.push([CX, CY+20*SC]);
+    let sx=0,sy=0; pts.forEach(([x,y])=>{sx+=x;sy+=y;});
+    const tcx=sx/pts.length, tcy=sy/pts.length;
 
-    /* Centroid of piece */
-    let sx=0,sy=0;pts.forEach(([x,y])=>{sx+=x;sy+=y;});
-    const tcx=sx/pts.length,tcy=sy/pts.length;
-
-    /* Spawn off-screen */
-    const edge=Math.floor(Math.random()*4);
+    /* Random spawn edge */
+    const edge = Math.floor(Math.random()*4);
     let spx,spy;
-    if(edge===0){spx=Math.random()*canvas.width;spy=-80;}
-    else if(edge===1){spx=canvas.width+80;spy=Math.random()*canvas.height;}
-    else if(edge===2){spx=Math.random()*canvas.width;spy=canvas.height+80;}
-    else{spx=-80;spy=Math.random()*canvas.height;}
+    if(edge===0){ spx=Math.random()*W;   spy=-120; }
+    else if(edge===1){ spx=W+120;        spy=Math.random()*H; }
+    else if(edge===2){ spx=Math.random()*W; spy=H+120; }
+    else            { spx=-120;           spy=Math.random()*H; }
+
+    /* Comic-book trail colour */
+    const trailColor = COLORS[(i+3)%COLORS.length];
 
     pieces.push({
-      pts,tcx,tcy,
-      spx,spy,
-      cx:spx,cy:spy,
-      angle:(Math.random()-0.5)*Math.PI*2,
-      color:COLORS[i%COLORS.length],
-      delay:i*90+300,
-      progress:0,settled:false,
+      pts, tcx, tcy, spx, spy,
+      angle      : (Math.random()-0.5)*Math.PI*(IS_MOBILE?1.6:2.4),
+      spinSpeed  : (Math.random()-0.5)*0.04,
+      color      : COLORS[i%COLORS.length],
+      trailColor,
+      emoji      : EMOJIS[i%EMOJIS.length],
+      delay      : T.piecesStart + i*70 + Math.random()*40,
+      flyDur     : 480 + Math.random()*160,
+      progress   : 0,
+      landed     : false,
+      /* Trail history for comic motion-blur */
+      trail      : [],
     });
   }
 
-  const animStart=performance.now();
-  let glowPhase=0; /* 0→1 after settled */
-  let allSettled=false;
-  let glowTimer=null;
+  /* ══ Particle pools ══ */
 
-  function drawPiece(piece,offsetX,offsetY,angle,alpha){
-    ctx.save();ctx.globalAlpha=alpha;
-    const {pts,tcx,tcy,color}=piece;
-    /* Puzzle nub: add a small bump on each edge for the jigsaw look */
-    ctx.beginPath();
-    pts.forEach(([px,py],idx)=>{
-      const lx=px-tcx+offsetX,ly=py-tcy+offsetY;
-      if(idx===0)ctx.moveTo(lx,ly);else ctx.lineTo(lx,ly);
-    });
-    ctx.closePath();
-    /* Gradient fill */
-    const grd=ctx.createLinearGradient(offsetX-50,offsetY-50,offsetX+50,offsetY+50);
-    grd.addColorStop(0,color);grd.addColorStop(1,lightenColor(color,30));
-    ctx.fillStyle=grd;ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=1.5;ctx.stroke();
-    /* Puzzle nub (small ellipse on mid edge) */
-    const mx=(pts[Math.floor(pts.length/2)][0]-tcx)+offsetX;
-    const my=(pts[Math.floor(pts.length/2)][1]-tcy)+offsetY;
-    ctx.beginPath();ctx.ellipse(mx,my,7*SC,5*SC,angle,0,Math.PI*2);
-    ctx.fillStyle=lightenColor(color,15);ctx.fill();
-    ctx.restore();
+  /* 1. Landing shockwave rings */
+  const shocks = [];
+  function spawnShock(x,y,color){
+    for(let k=0;k<2;k++)
+      shocks.push({x,y,r:0,maxR:(28+k*20)*SC,alpha:0.9,hue:0,color,delay:k*80,born:performance.now()});
   }
 
+  /* 2. Landing emoji burst (DOM floaters) */
+  function spawnEmojiFloat(x,y,emoji){
+    const n = IS_MOBILE ? 3 : 6;
+    for(let k=0;k<n;k++){
+      const el = document.createElement('div');
+      el.style.cssText=`
+        position:fixed;left:${x}px;top:${y}px;
+        font-size:${IS_MOBILE?16:22}px;
+        pointer-events:none;z-index:9200;
+        will-change:transform,opacity;
+        animation:sibEmojiFly ${700+Math.random()*500}ms cubic-bezier(.2,.9,.2,1) forwards;
+        --ex:${(Math.random()-0.5)*120}px;
+        --ey:${-(40+Math.random()*100)}px;
+        --rot:${(Math.random()-0.5)*360}deg;
+      `;
+      el.textContent = emoji;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 1400);
+    }
+  }
+
+  /* 3. Rainbow confetti */
+  const confetti = [];
+  function spawnConfetti(){
+    const n = Math.round(120*PB);
+    for(let i=0;i<n;i++){
+      confetti.push({
+        x: CX+(Math.random()-0.5)*180*SC, y: CY+(Math.random()-0.5)*180*SC,
+        vx:(Math.random()-0.5)*7, vy:-(4+Math.random()*8),
+        rot:Math.random()*Math.PI*2, rotV:(Math.random()-0.5)*0.22,
+        w: 5+Math.random()*10, h:3+Math.random()*6,
+        hue:Math.random()*360, sat:90+Math.random()*10, lit:60+Math.random()*20,
+        life:0, maxLife:110+Math.random()*90, grav:0.14,
+        shape: Math.random()<0.4?'circle':'rect',
+      });
+    }
+  }
+
+  /* 4. Gold star shower */
+  const goldStars = [];
+  function spawnGoldStar(){
+    goldStars.push({
+      x: Math.random()*W, y:-20,
+      vx:(Math.random()-0.5)*1.5, vy:1.2+Math.random()*2.5,
+      rot:Math.random()*Math.PI*2, rotV:(Math.random()-0.5)*0.09,
+      r: 4+Math.random()*8,
+      life:0, maxLife:200+Math.random()*120,
+      alpha:0, sway:Math.random()*Math.PI*2,
+      twinkle:Math.random()*Math.PI*2,
+    });
+  }
+
+  /* 5. Spotlight sweep */
+  let spotX = -W*0.3;
+  let spotActive = false;
+
+  /* 6. Iris-wipe state */
+  let irisR = 0;
+  let irisActive = false;
+
+  /* 7. Camera-pull zoom */
+  let camScale = 1;
+  let camPullActive = false;
+
+  /* 8. Rainbow outline phase */
+  let rainbowPhase = 0;
+  let rainbowActive = false;
+  let rainbowBeat = 0; /* 0-3 pulses */
+
+  /* ══ DRAW HELPERS ══ */
+
+  /* Lighten hex colour */
   function lightenColor(hex,amt){
     if(hex.startsWith('rgb'))return hex;
     const n=parseInt(hex.slice(1),16);
-    const r=Math.min(255,((n>>16)&255)+amt),g=Math.min(255,((n>>8)&255)+amt),b=Math.min(255,(n&255)+amt);
-    return`rgb(${r},${g},${b})`;
+    const r=Math.min(255,((n>>16)&255)+amt), g=Math.min(255,((n>>8)&255)+amt), b=Math.min(255,(n&255)+amt);
+    return `rgb(${r},${g},${b})`;
   }
 
-  /* Heart glow */
-  function drawHeartGlow(a){
-    const grd=ctx.createRadialGradient(CX,CY+30*SC,10,CX,CY+30*SC,120*SC);
-    grd.addColorStop(0,`rgba(255,79,139,${a*0.45})`);
-    grd.addColorStop(0.5,`rgba(156,255,143,${a*0.18})`);
-    grd.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=grd;ctx.beginPath();ctx.arc(CX,CY+30*SC,120*SC,0,Math.PI*2);ctx.fill();
-    glowEl.style.opacity=String(a*0.8);
+  /* Draw one puzzle piece */
+  function drawPiece(piece, ox, oy, angle, alpha, extraScale=1){
+    if(alpha<=0) return;
+    const{pts,tcx,tcy,color,trailColor,trail}=piece;
+    ctx.save();
+    ctx.globalAlpha=alpha;
+    /* Comic trail: fading ghost copies */
+    if(trail.length>1 && piece.progress<0.95){
+      trail.forEach((tr,ti)=>{
+        const ta=(1-(ti/trail.length))*0.28*alpha;
+        if(ta<0.02)return;
+        ctx.save(); ctx.globalAlpha=ta;
+        ctx.translate(tr.ox, tr.oy); ctx.rotate(tr.angle); ctx.scale(extraScale,extraScale);
+        ctx.beginPath();
+        pts.forEach(([px,py],idx)=>{
+          const lx=px-tcx, ly=py-tcy;
+          idx===0?ctx.moveTo(lx,ly):ctx.lineTo(lx,ly);
+        });
+        ctx.closePath();
+        ctx.fillStyle=trailColor; ctx.fill();
+        ctx.restore();
+      });
+    }
+    ctx.translate(ox, oy); ctx.rotate(angle); ctx.scale(extraScale,extraScale);
+    ctx.beginPath();
+    pts.forEach(([px,py],idx)=>{
+      const lx=px-tcx, ly=py-tcy;
+      idx===0?ctx.moveTo(lx,ly):ctx.lineTo(lx,ly);
+    });
+    ctx.closePath();
+    /* Gradient fill */
+    const grd=ctx.createLinearGradient(-50,-50,50,50);
+    grd.addColorStop(0,lightenColor(color,30));
+    grd.addColorStop(0.5,color);
+    grd.addColorStop(1,lightenColor(color,-15));
+    ctx.fillStyle=grd;
+    ctx.shadowBlur=rainbowActive?0:10; ctx.shadowColor=color+'99';
+    ctx.fill();
+    /* Stroke */
+    ctx.strokeStyle=rainbowActive
+      ? `hsl(${(rainbowPhase*360+pts[0][0])%360},90%,70%)`
+      : 'rgba(255,255,255,0.30)';
+    ctx.lineWidth=rainbowActive?3:1.8;
+    if(rainbowActive){ ctx.shadowBlur=14; ctx.shadowColor=`hsl(${(rainbowPhase*360)%360},90%,60%)`; }
+    ctx.stroke();
+    /* Jigsaw nub */
+    const mx=(pts[Math.floor(pts.length/2)][0]-tcx);
+    const my=(pts[Math.floor(pts.length/2)][1]-tcy);
+    ctx.shadowBlur=0;
+    ctx.fillStyle=lightenColor(color,20);
+    ctx.beginPath(); ctx.ellipse(mx,my,7*SC,5*SC,angle,0,Math.PI*2); ctx.fill();
+    ctx.restore();
   }
+
+  /* Glow behind heart */
+  function drawHeartGlow(a, phase=0){
+    const hue1=Math.floor((phase*180)%360);
+    const hue2=Math.floor((phase*180+120)%360);
+    const grd=ctx.createRadialGradient(CX,CY+20*SC,8,CX,CY+20*SC,140*SC);
+    grd.addColorStop(0,   `hsla(${hue1},90%,60%,${a*0.5})`);
+    grd.addColorStop(0.4, `hsla(${hue2},80%,55%,${a*0.22})`);
+    grd.addColorStop(0.7, `rgba(147,197,253,${a*0.14})`);
+    grd.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle=grd;
+    ctx.beginPath(); ctx.arc(CX,CY+20*SC,140*SC,0,Math.PI*2); ctx.fill();
+    glowEl.style.opacity=String(a*0.9);
+  }
+
+  /* Spotlight sweep */
+  function drawSpotlight(elapsed){
+    if(!spotActive) return;
+    const t=Math.min((elapsed-T.spotlight)/1200,1);
+    spotX = -W*0.2 + (W*1.4)*eInOut(t);
+    const sg=ctx.createRadialGradient(spotX,H*0.4,0,spotX,H*0.4,260);
+    sg.addColorStop(0,'rgba(255,245,200,0.13)');
+    sg.addColorStop(0.5,'rgba(255,220,100,0.06)');
+    sg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=sg; ctx.fillRect(0,0,W,H);
+  }
+
+  /* Iris wipe (circular close) */
+  function drawIrisWipe(elapsed){
+    if(!irisActive) return;
+    const t=Math.min((elapsed-T.irisWipe)/1200,1);
+    const maxR=Math.hypot(W,H)*0.7;
+    irisR=maxR*(1-eOut3(t));
+    if(irisR<=0) return;
+    ctx.save();
+    ctx.fillStyle='rgba(0,0,0,0.96)';
+    /* Cut-out circle */
+    ctx.beginPath();
+    ctx.rect(0,0,W,H);
+    ctx.arc(CX,CY,irisR,0,Math.PI*2,true); /* CCW = cut-out */
+    ctx.fill('evenodd');
+    ctx.restore();
+  }
+
+  /* 6-pointed sparkle star */
+  function drawSparkle(cx,cy,r,alpha,hue){
+    ctx.save(); ctx.globalAlpha=alpha;
+    ctx.strokeStyle=`hsl(${hue},90%,80%)`;
+    ctx.lineWidth=1.4; ctx.shadowBlur=8; ctx.shadowColor=`hsl(${hue},90%,65%)`;
+    for(let i=0;i<3;i++){
+      const a=(i/3)*Math.PI;
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+      ctx.lineTo(cx-Math.cos(a)*r,cy-Math.sin(a)*r);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /* ══ ACT 0: CLAPPERBOARD ══ */
+  setTimeout(()=>{
+    clapper.classList.add('snap');
+    /* Quick shake */
+    let shakes=0;
+    const shakeI=setInterval(()=>{
+      shakes++;
+      clapper.style.transform=`translate(-50%,-50%) scaleY(1) rotate(${shakes%2===0?-8:8}deg)`;
+      if(shakes>=4){
+        clearInterval(shakeI);
+        setTimeout(()=>clapper.classList.add('hide'),350);
+        setTimeout(()=>{ clapper.style.display='none'; },1000);
+      }
+    },80);
+  }, T.clapper + 200);
+
+  /* ══ MAIN LOOP — all timing elapsed-based, no external timers ══ */
+  const animStart=performance.now();
+  let glowPhase=0, allSettled=false;
+  let rainbowBeatTimer=0, rainbowDone=false;
+  let confettiDone=false, titleCardDone=false, typewriterDone=false;
+  let typewriterIdx=0, typewriterFrameCount=0;
+  const QUOTE='"Fights at home, together forever."';
 
   function puzzleLoop(ts){
-    const elapsed=ts-animStart;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const elapsed = ts - animStart;
+    ctx.clearRect(0,0,W,H);
+
+    /* Dark bg */
+    ctx.fillStyle=`rgba(4,2,16,${Math.min(elapsed/500,1)*0.88})`; ctx.fillRect(0,0,W,H);
+
+    /* Spotlight */
+    if(elapsed>=T.spotlight) spotActive=true;
+    drawSpotlight(elapsed);
+
+    /* Fly-in pieces */
     let settled=true;
     pieces.forEach(piece=>{
-      const pe=Math.max(0,elapsed-piece.delay),t=Math.min(pe/800,1);
-      const ease=1-Math.pow(1-t,3);
-      piece.progress=t;if(t<1)settled=false;
+      const pe=Math.max(0,elapsed-piece.delay);
+      const t=Math.min(pe/piece.flyDur,1);
+      if(t<1) settled=false;
+      piece.progress=t;
+      const ease=eOutBk(t,1.3);
       const ox=piece.spx+(piece.tcx-piece.spx)*ease;
       const oy=piece.spy+(piece.tcy-piece.spy)*ease;
-      const angle=piece.angle*(1-ease);
+      const angle=piece.angle*(1-eOut5(t));
+      if(t>0.02&&t<0.96&&Math.random()<.5){
+        piece.trail.unshift({ox:ox-piece.tcx,oy:oy-piece.tcy,angle});
+        if(piece.trail.length>6) piece.trail.pop();
+      }
+      if(t>=0.97&&!piece.landed){
+        piece.landed=true;
+        spawnShock(piece.tcx,piece.tcy,piece.color);
+        spawnEmojiFloat(piece.tcx,piece.tcy,piece.emoji);
+      }
       drawPiece(piece,ox-piece.tcx,oy-piece.tcy,angle,Math.min(t*2,1));
     });
 
-    if(settled&&!allSettled){
-      allSettled=true;
-      glowTimer=setTimeout(()=>{
-        /* Fade out */
-        const fadeStart=performance.now();
-        function fadeLoop(ts2){
-          const ft=Math.min((ts2-fadeStart)/1000,1);
-          ctx.clearRect(0,0,canvas.width,canvas.height);
-          drawHeartGlow(1-ft);
-          pieces.forEach(p=>{drawPiece(p,0,0,0,1-ft);});
-          if(ft<1)requestAnimationFrame(fadeLoop);
-          else{stage.classList.remove('active');glowEl.style.opacity='0';puzzleActive=false;}
-        }
-        requestAnimationFrame(fadeLoop);
-      },2800);
+    /* Shockwaves */
+    for(let i=shocks.length-1;i>=0;i--){
+      const s=shocks[i];const age=ts-s.born-s.delay;if(age<0)continue;
+      const t=Math.min(age/380,1);s.r=s.maxR*eOut3(t);s.alpha=Math.max(0,(1-t)*0.85);
+      if(s.alpha<=0){shocks.splice(i,1);continue;}
+      ctx.save();ctx.strokeStyle=s.color;ctx.lineWidth=Math.max(0.5,(1-t)*4);
+      ctx.shadowBlur=18;ctx.shadowColor=s.color;ctx.globalAlpha=s.alpha;
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.stroke();ctx.restore();
     }
 
+    /* Settled → rainbow */
+    if(settled&&!allSettled){allSettled=true;rainbowActive=true;}
+
+    /* Rainbow pulse */
+    if(rainbowActive&&!rainbowDone){
+      rainbowPhase=(rainbowPhase+0.02)%1; rainbowBeatTimer++;
+      if(rainbowBeatTimer>100){rainbowDone=true;rainbowActive=false;}
+    }
+
+    /* Glow + pieces */
     if(allSettled){
       glowPhase=Math.min(glowPhase+0.02,1);
-      drawHeartGlow(glowPhase);
-      /* Redraw settled pieces on top of glow */
-      pieces.forEach(p=>{drawPiece(p,0,0,0,1);});
+      const ct=Math.max(0,(elapsed-T.cameraPull)/1600);
+      const camSc=1+Math.min(ct,1)*0.06;
+      ctx.save();
+      if(camSc>1.001){ctx.translate(CX,CY);ctx.scale(camSc,camSc);ctx.translate(-CX,-CY);}
+      drawHeartGlow(glowPhase,rainbowPhase);
+      pieces.forEach(p=>drawPiece(p,0,0,0,1));
+      ctx.restore();
+      if(Math.random()<0.03){const a=Math.random()*Math.PI*2;const hp=heartPt(a);drawSparkle(hp[0],hp[1],4+Math.random()*6,0.7,(Math.random()*360)|0);}
     }
 
-    if(!allSettled)requestAnimationFrame(puzzleLoop);
+    /* Confetti */
+    if(elapsed>=T.confetti&&!confettiDone){confettiDone=true;spawnConfetti();}
+    for(let i=confetti.length-1;i>=0;i--){
+      const c=confetti[i];c.vx*=.978;c.vy+=c.grav;c.x+=c.vx;c.y+=c.vy;c.rot+=c.rotV;c.life++;
+      const ca=Math.max(0,1-c.life/c.maxLife);if(c.life>=c.maxLife){confetti.splice(i,1);continue;}
+      ctx.save();ctx.globalAlpha=ca;ctx.translate(c.x,c.y);ctx.rotate(c.rot);
+      ctx.fillStyle=`hsl(${c.hue},${c.sat}%,${c.lit}%)`;ctx.shadowBlur=4;ctx.shadowColor=`hsl(${c.hue},90%,70%)`;
+      if(c.shape==='circle'){ctx.beginPath();ctx.arc(0,0,c.w*.5,0,Math.PI*2);ctx.fill();}
+      else{ctx.fillRect(-c.w/2,-c.h/2,c.w,c.h);}
+      ctx.restore();
+    }
+
+    /* Title card */
+    if(elapsed>=T.titleCard&&!titleCardDone){titleCardDone=true;titleCard.classList.add('show');}
+
+    /* Typewriter — inline, frame-based, no setInterval */
+    if(elapsed>=T.typewriter&&!typewriterDone){
+      typewriterFrameCount++;
+      if(typewriterFrameCount%2===0){
+        quoteEl.textContent=QUOTE.slice(0,typewriterIdx);
+        quoteEl.classList.add('typed');
+        typewriterIdx++;
+        if(typewriterIdx>QUOTE.length){
+          typewriterDone=true;
+          quoteEl.classList.add('done');
+          signEl.classList.add('show');
+        }
+      }
+    }
+
+    /* Stars */
+    if(elapsed>=T.starShower&&goldStars.length<Math.round(35*PB)&&Math.random()<.16)spawnGoldStar();
+    for(let i=goldStars.length-1;i>=0;i--){
+      const s=goldStars[i];s.sway+=.022;s.twinkle+=.08;
+      s.x+=s.vx+Math.sin(s.sway)*.5;s.y+=s.vy;s.life++;
+      s.alpha=s.life<20?s.life/20:Math.max(0,1-(s.life-20)/(s.maxLife-20));
+      if(s.life>=s.maxLife){goldStars.splice(i,1);continue;}
+      const p2=1+.3*Math.sin(s.twinkle);
+      const gg=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r*p2*2.5);
+      gg.addColorStop(0,`rgba(255,235,100,${s.alpha*.9})`);gg.addColorStop(.4,`rgba(255,200,50,${s.alpha*.4})`);gg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=gg;ctx.beginPath();ctx.arc(s.x,s.y,s.r*p2*2.5,0,Math.PI*2);ctx.fill();
+      drawSparkle(s.x,s.y,s.r*p2*1.4,s.alpha*.85,48);
+    }
+
+    /* Iris wipe */
+    if(elapsed>=T.irisWipe) irisActive=true;
+    if(irisActive) drawIrisWipe(elapsed);
+
+    /* DONE — guaranteed advance */
+    if(elapsed>=T.done){
+      stage.classList.remove('active');
+      titleCard.classList.remove('show');
+      quoteEl.textContent=''; quoteEl.classList.remove('typed','done');
+      signEl.classList.remove('show');
+      glowEl.style.opacity='0';
+      const cl2=document.getElementById('sib-clapper');
+      if(cl2){cl2.className='';cl2.style.display='';}
+      puzzleActive=false;
+      vibeAnimDone(); /* AUTO advance */
+      return;
+    }
+
+    requestAnimationFrame(puzzleLoop);
   }
+
   requestAnimationFrame(puzzleLoop);
 }
 
